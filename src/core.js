@@ -16,6 +16,19 @@ var glQuery = (function() {
     render: function() {
       
     },
+    geometry: function() {
+      
+    },
+    indices: function() {
+    }
+    vertices: function() {
+    }
+    material: function() {
+      
+    },
+    light: function() {
+      
+    },
     length: 0,
   };
 
