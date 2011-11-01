@@ -8,6 +8,7 @@ var glQuery = (function() {
   // Buckets that hold renderer state
   buckets = {},
   // Logging / information methods
+  logDebug = function(msg) { console.log(msg); },
   logInfo = function(msg) { console.log(msg); },
   logWarning = function(msg) { console.log(msg); },
   logError = function(msg) { console.log(msg); },
@@ -27,38 +28,39 @@ var glQuery = (function() {
   // glQuery API
   glQuery.fn = glQuery.prototype = {
     init: function(selector, context) {
-      logInfo("init");
+      logDebug("init");
     },
     scene: function(sceneDef) {
-      logInfo("scene");
+      logDebug("scene");
       if (typeof sceneDef === 'string') {
         // TODO...
       }
     },
     render: function() {
-      logInfo("render");
+      logDebug("render");
     },
     triangles: function() {
-      logInfo("triangles");
+      logDebug("triangles");
     },
     indices: function() {
-      logInfo("indices");
+      logDebug("indices");
     },
     vertices: function() {
-      logInfo("vertices");
+      logDebug("vertices");
     },
     material: function() {
       logInfo("material");
     },
     light: function() {
-      logInfo("light");
+      logDebug("light");
     },
     length: 0,
   };
 
   glQuery.canvas = function(htmlId) {
+    logDebug("canvas");
     assertType(htmlId, 'string', 'canvas', 'htmlId');
-    logInfo("canvas: " + htmlId);
+    logInfo("Initialized canvas: " + htmlId);
   };
 
   return glQuery;
