@@ -20,6 +20,7 @@ var glQuery = (function() {
   logInfo = function(msg) { console.log(msg); };
   logWarning = function(msg) { console.log(msg); };
   logError = function(msg) { console.log(msg); };
+  assert = function(condition, msg) { if (!condition) logError(msg); }
 
   // glQuery API
   glQuery.fn = glQuery.prototype = {
@@ -33,7 +34,7 @@ var glQuery = (function() {
       }
     },
     render: function() {
-      logInfo("render");      
+      logInfo("render");
     },
     triangles: function() {
       logInfo("triangles");
