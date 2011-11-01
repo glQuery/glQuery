@@ -1,0 +1,14 @@
+{
+  "name": "glQuery",
+  "version": "0.0.1",
+  "description": "A fluent WebGL engine",
+  "homepage": "http://glquery.org",
+  "private": false,
+  "directories": {
+    "dist": "./dist"
+  },
+  "dependencies": {
+    "coffee-script": ">=0.0.0"
+  }
+}
+
