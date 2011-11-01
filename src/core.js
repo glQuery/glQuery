@@ -8,26 +8,38 @@ var glQuery = (function() {
   // Buckets that hold renderer state
   buckets = {};
 
+  logInfo = function(msg) { console.log(msg); };
+  logWarning = function(msg) { console.log(msg); };
+  logError = function(msg) { console.log(msg); };
+
   // glQuery API
   glQuery.fn = glQuery.prototype = {
     init: function(selector, context) {
-      
+      logInfo("init");
+    },
+    scene: function(sceneDef) {
+      logInfo("scene");
+      if (typeof sceneDef === 'String') {
+        // TODO...
+      }
     },
     render: function() {
-      
+      logInfo("render");      
     },
-    geometry: function() {
-      
+    triangles: function() {
+      logInfo("triangles");
     },
     indices: function() {
-    }
+      logInfo("indices");
+    },
     vertices: function() {
-    }
+      logInfo("vertices");
+    },
     material: function() {
-      
+      logInfo("material");
     },
     light: function() {
-      
+      logInfo("light");
     },
     length: 0,
   };
