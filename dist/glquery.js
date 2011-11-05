@@ -22,6 +22,7 @@ var glQuery = (function() {
   logWarning = function(msg) { console.log(msg); },
   logError = function(msg) { console.log(msg); },
   // Run-time checks
+  // TODO: Should we provide checks that throw exceptions rather than logging messages?
   assert = function(condition, msg) { if (!condition) logError(msg); },
   assertType = function(param, typeStr, parentFunction, paramStr) {
     if (paramStr != null && parentFunction != null)
@@ -77,10 +78,11 @@ var glQuery = (function() {
       this._context = context;
       return this;
     },
-    /*render: function() {
+    render: function(context) {
       logDebug("render");
+      assertType(context, 'object', 'render', 'context');
       return this;
-    },*/
+    },
     triangles: function() {
       logDebug("triangles");
       return this;
@@ -105,7 +107,7 @@ var glQuery = (function() {
   };
 
   // Initialize a webgl canvas
-  glQuery.canvas = function(htmlCanvas, width, height) {
+  glQuery.canvas = function(htmlCanvas, contextAttr, width, height) {
     var canvasId, canvasEl;
     logDebug("canvas");
     if (typeof htmlCanvas === 'undefined') {
@@ -126,12 +128,16 @@ var glQuery = (function() {
     else
       logInfo("Initialized canvas");
     // Initialize the WebGL context
-    // TODO: ...
+    var canvasCtx = canvasEl.getContext('experimental-webgl', contextAttr);
+    if (!canvasCtx)
+      assert(false, "Could not get a 'experimental-webgl' context.");
+
     // Wrap glQuery canvas
     return (function() { 
       var self = { // Private
         canvasEl: canvasEl,
-        rootId: null
+        canvasCtx: canvasCtx,
+        rootId: null,
       };
       return { // Public
         start: function(rootId) {
