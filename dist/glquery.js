@@ -117,10 +117,10 @@ var glQuery = (function() {
     else {
       // Get existing canvas element
       assert(typeof htmlCanvas === 'string' || (typeof htmlCanvas === 'object' && htmlCanvas.nodeName !== 'CANVAS'), "In call to 'canvas', expected type 'string', 'undefined' or 'canvas element' for 'htmlCanvas'. Instead, got type '" + typeof htmlCanvas + "'.");
-      canvasId = typeof canvasEl === 'string'? htmlCanvas : htmlCanvas.id;
+      canvasId = typeof htmlCanvas === 'string'? htmlCanvas : htmlCanvas.id;
       canvasEl = typeof htmlCanvas === 'object'? htmlCanvas : document.getElementById(canvasId);
     }
-    assert(canvasEl != null, "In call to 'canvas', could not initialize canvas element.");
+    assert(canvasEl != null && typeof canvasEl === 'object' && canvasEl.nodeName === 'CANVAS', "In call to 'canvas', could not initialize canvas element.");
     if (canvasId != null)
       logInfo("Initialized canvas: " + canvasId);
     else
