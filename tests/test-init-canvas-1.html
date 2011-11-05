@@ -3,7 +3,7 @@
 <head>
   <meta charset='utf-8'>
   <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
-  <title>glQuery - Tests</title>
+  <title>glQuery - Initialize using existing canvas by id</title>
   <meta name='description' content='Tests for glQuery'>
   <link rel="shortcut icon" href="/favicon.ico">
 
@@ -18,7 +18,13 @@
   <div id='glqueryLog'></div>
 
   <div id='main-layout'>
-    <iframe src='test-init-canvas-1.html' width='800' height='600'></iframe>
+    <div id='viewport'>
+      <!-- -->
+      <canvas id='glqueryCanvas' width='512' height='512'>
+        <p>This application requires a browser that supports the<a href='http://www.w3.org/html/wg/html5/'>HTML5</a>&lt;canvas&gt; feature.</p>
+      </canvas>
+      <!-- -->
+    </div>
   </div>
 
   <!-- Prompt IE users to install Chrome Frame. chromium.org/developers/how-tos/chrome-frame-getting-started -->
@@ -27,5 +33,22 @@
     <script>window.attachEvent('onload',function(){CFInstall.check({mode:'overlay'})})</script>
   <![endif]-->
 
+  <!-- Framework -->
+
+  <script src='../dist/glquery.js'></script>
+  
+  <!-- Resources -->
+
+
+  <!-- Application logic -->
+
+  <script>
+    glQuery.canvas('glqueryCanvas').start('main');
+    glQuery
+    .scene('main')
+    .vertices()
+    .indices()
+    .triangles();
+  </script>
 </body>
 </html>
