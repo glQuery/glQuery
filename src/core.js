@@ -116,18 +116,23 @@ var glQuery = (function() {
       logInfo("Initialized canvas: " + canvasId);
     else
       logInfo("Initialized canvas");
+    // Initialize the WebGL context
+    // TODO: ...
     // Wrap glQuery canvas
-    // TODO: Hide private members?
-    return { 
-      _canvasEl: canvasEl,
-      _rootId: null,
-      start: function(rootId) {
-        if (rootId != null) {
-          assertType(rootId, 'string', 'canvas.start', 'rootId');
-          this._rootId = rootId;
+    return (function() { 
+      var self = { // Private
+        canvasEl: canvasEl,
+        rootId: null
+      };
+      return { // Public
+        start: function(rootId) {
+          if (rootId != null) {
+            assertType(rootId, 'string', 'canvas.start', 'rootId');
+            self.rootId = rootId;
+          }
         }
       }
-    };
+    })();
   };
 
   // Create a glQuery scene hierarchy
