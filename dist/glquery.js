@@ -73,24 +73,33 @@ var glQuery = (function() {
   glQuery.fn = glQuery.prototype = {
     init: function(selector, context) {
       logDebug("init");
+      this._selector = selector;
+      this._context = context;
+      return this;
     },
-    render: function() {
+    /*render: function() {
       logDebug("render");
-    },
+      return this;
+    },*/
     triangles: function() {
       logDebug("triangles");
+      return this;
     },
     indices: function() {
       logDebug("indices");
+      return this;
     },
     vertices: function() {
       logDebug("vertices");
+      return this;
     },
     material: function() {
       logDebug("material");
+      return this;
     },
     light: function() {
       logDebug("light");
+      return this;
     },
     length: 0,
   };
@@ -117,7 +126,7 @@ var glQuery = (function() {
     else
       logInfo("Initialized canvas");
     // Wrap glQuery canvas
-    // TODO: Hide private members
+    // TODO: Hide private members?
     return { 
       _canvasEl: canvasEl,
       _rootId: null,
@@ -154,6 +163,7 @@ var glQuery = (function() {
     if (rootIds.length === 0) {
       rootIds = generateId();
       scene[rootIds] = [];
+      logWarning("In call to 'scene', no nodes supplied. Generating a single root node.");
     }
     return glQuery.fn.init(rootIds);
   };
