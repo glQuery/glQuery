@@ -78,6 +78,7 @@ var glQuery = (function() {
         || window.oCancelRequestAnimationFrame
         || window.msCancelRequestAnimationFrame
         || window.clearTimeout;
+  })();
 
   // glQuery API
   glQuery.fn = glQuery.prototype = {
@@ -87,9 +88,10 @@ var glQuery = (function() {
       this._context = context;
       return this;
     },
-    render: function(context) {
+    render: function(context, rootId) {
       logDebug("render");
       assertType(context, 'object', 'render', 'context');
+      assertType(rootId, 'string', 'render', 'rootId');
       return this;
     },
     triangles: function() {
@@ -112,7 +114,7 @@ var glQuery = (function() {
       logDebug("light");
       return this;
     },
-    length: 0,
+    length: 0
   };
 
   // Initialize a webgl canvas
@@ -147,15 +149,25 @@ var glQuery = (function() {
         canvasEl: canvasEl,
         canvasCtx: canvasCtx,
         rootId: null,
+        nextFrame: null,
+        callback: function() {
+          self = this;
+          return function() {
+            glQuery.render(self.canvasCtx, rootId);
+            self.nextFrame = window.requestAnimationFrame(this, self.canvasEl);
+          };
+        }
       };
       return { // Public
         start: function(rootId) {
+          logDebug("start");
           if (rootId != null) {
             assertType(rootId, 'string', 'canvas.start', 'rootId');
             self.rootId = rootId;
+            self.nextFrame = window.requestAnimationFrame(self.callback(), self.canvasEl);
           }
         }
-      }
+      };
     })();
   };
 
@@ -195,3 +207,4 @@ var glQuery = (function() {
 
   return glQuery;
 })();
+
