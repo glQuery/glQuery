@@ -61,6 +61,24 @@ var glQuery = (function() {
     return r;
   };
 
+  // Cross-browser initialization
+  window.requestAnimationFrame = (function(){
+    return window.requestAnimationFrame
+        || window.webkitRequestAnimationFrame
+        || window.mozRequestAnimationFrame
+        || window.oRequestAnimationFrame
+        || window.msRequestAnimationFrame
+        || function(callback, element){ window.setTimeout(callback, 1000 / 60); };
+  })();
+
+  window.cancelRequestAnimationFrame = (function(){
+    return window.cancelRequestAnimationFrame
+        || window.webkitCancelRequestAnimationFrame
+        || window.mozCancelRequestAnimationFrame
+        || window.oCancelRequestAnimationFrame
+        || window.msCancelRequestAnimationFrame
+        || window.clearTimeout;
+
   // glQuery API
   glQuery.fn = glQuery.prototype = {
     init: function(selector, context) {
@@ -168,6 +186,11 @@ var glQuery = (function() {
       logWarning("In call to 'scene', no nodes supplied. Generating a single root node.");
     }
     return glQuery.fn.init(rootIds);
+  };
+
+  glQuery.worker = function(workerId, callback) {
+    // TODO:
+    logError("(TODO) Workers are not yet implemented...");
   };
 
   return glQuery;
