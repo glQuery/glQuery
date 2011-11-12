@@ -83,15 +83,14 @@ var glQuery = (function() {
   // glQuery API
   glQuery.fn = glQuery.prototype = {
     init: function(selector, context) {
-      logDebug("init");
+      //logDebug("init");
       this._selector = selector;
       this._context = context;
       return this;
     },
-    render: function(context, rootId) {
-      logDebug("render");
+    render: function(context) {
+      //logDebug("render");
       assertType(context, 'object', 'render', 'context');
-      assertType(rootId, 'string', 'render', 'rootId');
       return this;
     },
     triangles: function() {
@@ -152,9 +151,9 @@ var glQuery = (function() {
         nextFrame: null,
         callback: function() {
           self = this;
-          return function() {
-            glQuery.render(self.canvasCtx, rootId);
-            self.nextFrame = window.requestAnimationFrame(this, self.canvasEl);
+          return function callback() {
+            glQuery(self.rootId).render(self.canvasCtx);
+            self.nextFrame = window.requestAnimationFrame(callback, self.canvasEl);
           };
         }
       };
@@ -200,7 +199,7 @@ var glQuery = (function() {
     return glQuery.fn.init(rootIds);
   };
 
-  glQuery.worker = function(workerId, callback) {
+  glQuery.worker = function(workerId, js) {
     // TODO:
     logError("(TODO) Workers are not yet implemented...");
   };
