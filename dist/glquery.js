@@ -6,16 +6,6 @@
 "use strict";
 var glQuery = (function() {
 
-  var command = {
-    insert: 0,
-    remove: 1,
-    triangles: 2,
-    indices: 3,
-    vertices: 4,
-    material: 5,
-    light: 6
-  };
-
   // Define a local copy of glQuery
   var glQuery = function(selector, context) {
     return glQuery.fn.init(selector, context);
@@ -96,6 +86,16 @@ var glQuery = (function() {
         || window.msCancelRequestAnimationFrame
         || window.clearTimeout;
   })();
+
+  var command = {
+    insert: 0,
+    remove: 1,
+    triangles: 2,
+    indices: 3,
+    vertices: 4,
+    material: 5,
+    light: 6
+  };
 
   // glQuery API
   glQuery.fn = glQuery.prototype = {
@@ -222,6 +222,5 @@ var glQuery = (function() {
   };
 
   return glQuery;
-
 })();
 

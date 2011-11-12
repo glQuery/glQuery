@@ -5,8 +5,12 @@ path   = require 'path'
 libFiles  = [
   # omit src/ and .js to make the below lines a little shorter
   'header'
-  'command'
   'core'
+  'command'
+  'api'
+  'canvas'
+  'scene'
+  'worker'
   'footer'
 ]
 
