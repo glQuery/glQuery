@@ -6,6 +6,7 @@ libFiles  = [
   # omit src/ and .js to make the below lines a little shorter
   'header'
   'core'
+  'footer'
 ]
 
 task 'build', "Concatenate source files into a single library file", ->

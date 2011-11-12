@@ -4,4 +4,5 @@
  * (Also available under an MIT license and a GPL v2.0 license)
  */
 "use strict";
+var glQuery = (function() {
 

@@ -4,10 +4,10 @@
  * (Also available under an MIT license and a GPL v2.0 license)
  */
 "use strict";
-
-
-
 var glQuery = (function() {
+
+
+
   // Define a local copy of glQuery
   var glQuery = function(selector, context) {
     return glQuery.fn.init(selector, context);
@@ -214,5 +214,8 @@ var glQuery = (function() {
   };
 
   return glQuery;
+
+
+
 })();
 
