@@ -204,4 +204,3 @@
   };
 
   return glQuery;
-

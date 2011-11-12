@@ -5,6 +5,7 @@ path   = require 'path'
 libFiles  = [
   # omit src/ and .js to make the below lines a little shorter
   'header'
+  'command'
   'core'
   'footer'
 ]
@@ -20,7 +21,7 @@ task 'build', "Concatenate source files into a single library file", ->
       process() if --remaining is 0
   # Translate concatenated file
   process = ->
-    fs.writeFile 'dist/glquery.js', libContents.join('\n\n'), 'utf8', (err) ->
+    fs.writeFile 'dist/glquery.js', libContents.join('\n'), 'utf8', (err) ->
       throw err if err
       console.log "Done."
 

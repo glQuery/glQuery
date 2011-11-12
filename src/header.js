@@ -5,4 +5,3 @@
  */
 "use strict";
 var glQuery = (function() {
-

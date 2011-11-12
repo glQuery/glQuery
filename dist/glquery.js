@@ -6,7 +6,15 @@
 "use strict";
 var glQuery = (function() {
 
-
+  var command = {
+    insert: 0,
+    remove: 1,
+    triangles: 2,
+    indices: 3,
+    vertices: 4,
+    material: 5,
+    light: 6
+  };
 
   // Define a local copy of glQuery
   var glQuery = function(selector, context) {
@@ -214,8 +222,6 @@ var glQuery = (function() {
   };
 
   return glQuery;
-
-
 
 })();
 
