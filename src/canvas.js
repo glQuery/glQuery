@@ -27,26 +27,46 @@
     // Wrap glQuery canvas
     return (function() { 
       var self = { // Private
-        canvasEl: canvasEl,
-        canvasCtx: canvasCtx,
+        ctx: canvasCtx,
         rootId: null,
         nextFrame: null,
         callback: function() {
           self = this;
           return function callback() {
-            glQuery(self.rootId).render(self.canvasCtx);
-            self.nextFrame = window.requestAnimationFrame(callback, self.canvasEl);
+            glQuery(self.rootId).render(self.ctx);
+            self.nextFrame = window.requestAnimationFrame(callback, self.ctx.canvas);
           };
         }
       };
       return { // Public
         start: function(rootId) {
-          logDebug("start");
+          logDebug("canvas.start");
           if (rootId != null) {
             assertType(rootId, 'string', 'canvas.start', 'rootId');
             self.rootId = rootId;
-            self.nextFrame = window.requestAnimationFrame(self.callback(), self.canvasEl);
+            self.nextFrame = window.requestAnimationFrame(self.callback(), self.ctx.canvas);
           }
+          return this;
+        },
+        clear: function(mask) {
+          logDebug("canvas.clear");
+
+          return this;
+        },
+        clearColor: function(r,g,b,a) {
+          logDebug("canvas.clearColor");
+          self.ctx.clearColor(r,g,b,a);
+          return this;
+        },
+        clearDepth: function(d) {
+          logDebug("canvas.clearDepth");
+          self.ctx.clearDepth(d);
+          return this;
+        },
+        clearStencil: function(s) {
+          logDebug("canvas.clearStencil");
+          self.ctx.clearStencil(s);
+          return this;
         }
       };
     })();
