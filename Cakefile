@@ -5,8 +5,8 @@ path   = require 'path'
 libFiles  = [
   # omit src/ and .js to make the below lines a little shorter
   'header'
-  'webgl-constants'
   'core'
+  'webgl-constants'
   'command'
   'api'
   'canvas'
