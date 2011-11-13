@@ -43,9 +43,10 @@
   <!-- Application logic -->
 
   <script>
-    glQuery.canvas('glqueryCanvas').start('main');
-    glQuery
-    .scene('main')
+    var gl = glQuery;
+    gl.canvas('glqueryCanvas')
+    .start('main');
+    gl.scene('main')
     .vertices()
     .indices()
     .triangles();
