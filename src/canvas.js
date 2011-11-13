@@ -30,9 +30,11 @@
         ctx: canvasCtx,
         rootId: null,
         nextFrame: null,
+        clearMask: gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT,
         callback: function() {
           self = this;
           return function callback() {
+            self.ctx.clear(self.clearMask);
             gl(self.rootId).render(self.ctx);
             self.nextFrame = window.requestAnimationFrame(callback, self.ctx.canvas);
           };
@@ -50,7 +52,7 @@
         },
         clear: function(mask) {
           logDebug("canvas.clear");
-
+          self.clearMask = mask;
           return this;
         },
         clearColor: function(r,g,b,a) {
