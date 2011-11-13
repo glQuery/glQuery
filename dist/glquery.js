@@ -7,8 +7,8 @@
 var glQuery = (function() {
 
   // Define a local copy of glQuery
-  var glQuery = function(selector, context) {
-    return glQuery.fn.init(selector, context);
+  var glQuery = function(selector) {
+    return glQuery.fn.init(selector);
   },
   // The scene which contains the hierarchy of identifiers
   scene = {},
@@ -95,14 +95,37 @@ var glQuery = (function() {
     vertices: 4,
     material: 5,
     light: 6
-  };
+  },
+  commandDispatch = [
+    // insert: 0
+    function() {
+    },
+    // remove: 1
+    function() {
+    },
+    // triangles: 2
+    function() {
+    },
+    // indices: 3
+    function() {
+    },
+    // vertices: 4
+    function() {
+    },
+    // material: 5
+    function() {
+    },
+    // light: 6
+    function() {
+    },
+  ];
+  
 
   // glQuery API
   glQuery.fn = glQuery.prototype = {
-    init: function(selector, context) {
+    init: function(selector) {
       //logDebug("init");
       this._selector = selector;
-      this._context = context;
       return this;
     },
     render: function(context) {
@@ -162,26 +185,46 @@ var glQuery = (function() {
     // Wrap glQuery canvas
     return (function() { 
       var self = { // Private
-        canvasEl: canvasEl,
-        canvasCtx: canvasCtx,
+        ctx: canvasCtx,
         rootId: null,
         nextFrame: null,
         callback: function() {
           self = this;
           return function callback() {
-            glQuery(self.rootId).render(self.canvasCtx);
-            self.nextFrame = window.requestAnimationFrame(callback, self.canvasEl);
+            glQuery(self.rootId).render(self.ctx);
+            self.nextFrame = window.requestAnimationFrame(callback, self.ctx.canvas);
           };
         }
       };
       return { // Public
         start: function(rootId) {
-          logDebug("start");
+          logDebug("canvas.start");
           if (rootId != null) {
             assertType(rootId, 'string', 'canvas.start', 'rootId');
             self.rootId = rootId;
-            self.nextFrame = window.requestAnimationFrame(self.callback(), self.canvasEl);
+            self.nextFrame = window.requestAnimationFrame(self.callback(), self.ctx.canvas);
           }
+          return this;
+        },
+        clear: function(mask) {
+          logDebug("canvas.clear");
+
+          return this;
+        },
+        clearColor: function(r,g,b,a) {
+          logDebug("canvas.clearColor");
+          self.ctx.clearColor(r,g,b,a);
+          return this;
+        },
+        clearDepth: function(d) {
+          logDebug("canvas.clearDepth");
+          self.ctx.clearDepth(d);
+          return this;
+        },
+        clearStencil: function(s) {
+          logDebug("canvas.clearStencil");
+          self.ctx.clearStencil(s);
+          return this;
         }
       };
     })();
