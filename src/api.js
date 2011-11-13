@@ -1,9 +1,8 @@
   // glQuery API
   glQuery.fn = glQuery.prototype = {
-    init: function(selector, context) {
+    init: function(selector) {
       //logDebug("init");
       this._selector = selector;
-      this._context = context;
       return this;
     },
     render: function(context) {
