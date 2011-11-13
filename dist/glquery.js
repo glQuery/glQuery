@@ -450,8 +450,8 @@ var glQuery = (function() {
 
 
   // Define a local copy of glQuery
-  var glQuery = function(selector) {
-    return glQuery.fn.init(selector);
+  var gl = function(selector) {
+    return gl.fn.init(selector);
   },
   // The scene which contains the hierarchy of identifiers
   scene = {},
@@ -565,7 +565,7 @@ var glQuery = (function() {
   
 
   // glQuery API
-  glQuery.fn = glQuery.prototype = {
+  gl.fn = gl.prototype = {
     init: function(selector) {
       //logDebug("init");
       this._selector = selector;
@@ -600,7 +600,7 @@ var glQuery = (function() {
   };
 
   // Initialize a webgl canvas
-  glQuery.canvas = function(htmlCanvas, contextAttr, width, height) {
+  gl.canvas = function(htmlCanvas, contextAttr, width, height) {
     var canvasId, canvasEl;
     logDebug("canvas");
     if (typeof htmlCanvas === 'undefined') {
@@ -634,7 +634,7 @@ var glQuery = (function() {
         callback: function() {
           self = this;
           return function callback() {
-            glQuery(self.rootId).render(self.ctx);
+            gl(self.rootId).render(self.ctx);
             self.nextFrame = window.requestAnimationFrame(callback, self.ctx.canvas);
           };
         }
@@ -674,7 +674,7 @@ var glQuery = (function() {
   };
 
   // Create a glQuery scene hierarchy
-  glQuery.scene = function() {
+  gl.scene = function() {
     logDebug("scene");
     var rootIds = [];
     for (var i = 0; i < arguments.length; ++i) {
@@ -699,14 +699,14 @@ var glQuery = (function() {
       scene[rootIds] = [];
       logWarning("In call to 'scene', no nodes supplied. Generating a single root node.");
     }
-    return glQuery.fn.init(rootIds);
+    return gl.fn.init(rootIds);
   };
 
-  glQuery.worker = function(workerId, js) {
+  gl.worker = function(workerId, js) {
     // TODO:
     logError("(TODO) Workers are not yet implemented...");
   };
 
-  return glQuery;
+  return gl;
 })();
 

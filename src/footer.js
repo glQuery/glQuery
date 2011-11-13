@@ -1,3 +1,3 @@
-  return glQuery;
+  return gl;
 })();
 

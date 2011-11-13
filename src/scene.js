@@ -1,5 +1,5 @@
   // Create a glQuery scene hierarchy
-  glQuery.scene = function() {
+  gl.scene = function() {
     logDebug("scene");
     var rootIds = [];
     for (var i = 0; i < arguments.length; ++i) {
@@ -24,5 +24,5 @@
       scene[rootIds] = [];
       logWarning("In call to 'scene', no nodes supplied. Generating a single root node.");
     }
-    return glQuery.fn.init(rootIds);
+    return gl.fn.init(rootIds);
   };

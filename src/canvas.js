@@ -1,5 +1,5 @@
   // Initialize a webgl canvas
-  glQuery.canvas = function(htmlCanvas, contextAttr, width, height) {
+  gl.canvas = function(htmlCanvas, contextAttr, width, height) {
     var canvasId, canvasEl;
     logDebug("canvas");
     if (typeof htmlCanvas === 'undefined') {
@@ -33,7 +33,7 @@
         callback: function() {
           self = this;
           return function callback() {
-            glQuery(self.rootId).render(self.ctx);
+            gl(self.rootId).render(self.ctx);
             self.nextFrame = window.requestAnimationFrame(callback, self.ctx.canvas);
           };
         }

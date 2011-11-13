@@ -1,5 +1,5 @@
   // glQuery API
-  glQuery.fn = glQuery.prototype = {
+  gl.fn = gl.prototype = {
     init: function(selector) {
       //logDebug("init");
       this._selector = selector;

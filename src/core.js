@@ -1,6 +1,6 @@
   // Define a local copy of glQuery
-  var glQuery = function(selector) {
-    return glQuery.fn.init(selector);
+  var gl = function(selector) {
+    return gl.fn.init(selector);
   },
   // The scene which contains the hierarchy of identifiers
   scene = {},

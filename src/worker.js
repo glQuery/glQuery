@@ -1,4 +1,4 @@
-  glQuery.worker = function(workerId, js) {
+  gl.worker = function(workerId, js) {
     // TODO:
     logError("(TODO) Workers are not yet implemented...");
   };
