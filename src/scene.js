@@ -5,7 +5,7 @@
     for (var i = 0; i < arguments.length; ++i) {
       var sceneDef = arguments[i];
       if (typeof sceneDef === 'string') {
-        scene[sceneDef] = [];
+        scenes[sceneDef] = [];
         rootIds.push(sceneDef);
       }
       else {
@@ -15,13 +15,13 @@
         var normalizedScene = normalizeNodes(sceneDef);
         for (key in normalizedScene) {
           rootIds.push(key);
-          scene[key] = normalizedScene[key];
+          scenes[key] = normalizedScene[key];
         }
       }
     }
     if (rootIds.length === 0) {
       rootIds = generateId();
-      scene[rootIds] = [];
+      scenes[rootIds] = [];
       logWarning("In call to 'scene', no nodes supplied. Generating a single root node.");
     }
     return gl.fn.init(rootIds);

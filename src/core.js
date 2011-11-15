@@ -2,8 +2,10 @@
   var gl = function(selector) {
     return gl.fn.init(selector);
   },
-  // The scene which contains the hierarchy of identifiers
-  scene = {},
+  // The scenes, each of which contains a hierarchy of identifiers
+  scenes = {},
+  // All shader definitions
+  shaders = {},
   // Buckets that hold renderer state
   buckets = {},
   // Logging / information methods

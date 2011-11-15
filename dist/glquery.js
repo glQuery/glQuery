@@ -10,8 +10,10 @@ var glQuery = (function() {
   var gl = function(selector) {
     return gl.fn.init(selector);
   },
-  // The scene which contains the hierarchy of identifiers
-  scene = {},
+  // The scenes, each of which contains a hierarchy of identifiers
+  scenes = {},
+  // All shader definitions
+  shaders = {},
   // Buckets that hold renderer state
   buckets = {},
   // Logging / information methods
@@ -532,11 +534,13 @@ var glQuery = (function() {
   var command = {
     insert: 0,
     remove: 1,
-    triangles: 2,
-    indices: 3,
+    shaderProgram: 2,
+    triangles: 3,
     vertices: 4,
-    material: 5,
-    light: 6
+    normals: 5,
+    indices: 6,
+    material: 7,
+    light: 8
   },
   commandDispatch = [
     // insert: 0
@@ -545,22 +549,29 @@ var glQuery = (function() {
     // remove: 1
     function() {
     },
-    // triangles: 2
+    // shaderProgram: 2
     function() {
     },
-    // indices: 3
+    // triangles: 3
     function() {
     },
     // vertices: 4
     function() {
     },
-    // material: 5
+    // normals: 5
     function() {
     },
-    // light: 6
+    // indices: 6
+    function() {
+    },
+    // material: 7
+    function() {
+    },
+    // light: 8
     function() {
     },
   ];
+  assert(commandDispatch.length == command.light + 1, "Internal Error: Number of commands in commandDispatch is incorrect.");
   
 
   // glQuery API
@@ -681,7 +692,7 @@ var glQuery = (function() {
     for (var i = 0; i < arguments.length; ++i) {
       var sceneDef = arguments[i];
       if (typeof sceneDef === 'string') {
-        scene[sceneDef] = [];
+        scenes[sceneDef] = [];
         rootIds.push(sceneDef);
       }
       else {
@@ -691,13 +702,13 @@ var glQuery = (function() {
         var normalizedScene = normalizeNodes(sceneDef);
         for (key in normalizedScene) {
           rootIds.push(key);
-          scene[key] = normalizedScene[key];
+          scenes[key] = normalizedScene[key];
         }
       }
     }
     if (rootIds.length === 0) {
       rootIds = generateId();
-      scene[rootIds] = [];
+      scenes[rootIds] = [];
       logWarning("In call to 'scene', no nodes supplied. Generating a single root node.");
     }
     return gl.fn.init(rootIds);

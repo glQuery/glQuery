@@ -1,11 +1,13 @@
   var command = {
     insert: 0,
     remove: 1,
-    triangles: 2,
-    indices: 3,
+    shaderProgram: 2,
+    triangles: 3,
     vertices: 4,
-    material: 5,
-    light: 6
+    normals: 5,
+    indices: 6,
+    material: 7,
+    light: 8
   },
   commandDispatch = [
     // insert: 0
@@ -14,20 +16,27 @@
     // remove: 1
     function() {
     },
-    // triangles: 2
+    // shaderProgram: 2
     function() {
     },
-    // indices: 3
+    // triangles: 3
     function() {
     },
     // vertices: 4
     function() {
     },
-    // material: 5
+    // normals: 5
     function() {
     },
-    // light: 6
+    // indices: 6
+    function() {
+    },
+    // material: 7
+    function() {
+    },
+    // light: 8
     function() {
     },
   ];
+  assert(commandDispatch.length == command.light + 1, "Internal Error: Number of commands in commandDispatch is incorrect.");
   
