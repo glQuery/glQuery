@@ -586,6 +586,10 @@ var glQuery = (function() {
       assertType(context, 'object', 'render', 'context');
       return this;
     },
+    shaderProgram: function() {
+      logDebug("shaderProgram");
+      return this;
+    },
     triangles: function() {
       logDebug("triangles");
       return this;
@@ -712,6 +716,18 @@ var glQuery = (function() {
       logWarning("In call to 'scene', no nodes supplied. Generating a single root node.");
     }
     return gl.fn.init(rootIds);
+  };
+
+  // Load a scenejs shader
+  gl.shader = function(id, code) {
+    logDebug("shader");
+    // TODO: shaders[id] already exists, make sure all related resources are cleaned up
+    if (typeof code == null) {
+      delete shaders[id];
+    } else {
+      assertType(code, 'string', 'shader', 'code');
+      shaders[id] = code;
+    }
   };
 
   gl.worker = function(workerId, js) {

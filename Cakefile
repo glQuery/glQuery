@@ -11,6 +11,7 @@ libFiles  = [
   'api'
   'canvas'
   'scene'
+  'shader'
   'worker'
   'footer'
 ]

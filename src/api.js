@@ -10,6 +10,10 @@
       assertType(context, 'object', 'render', 'context');
       return this;
     },
+    shaderProgram: function() {
+      logDebug("shaderProgram");
+      return this;
+    },
     triangles: function() {
       logDebug("triangles");
       return this;
