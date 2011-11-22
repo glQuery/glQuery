@@ -40,3 +40,12 @@
   ];
   assert(commandDispatch.length == command.light + 1, "Internal Error: Number of commands in commandDispatch is incorrect.");
   
+  // Execute a command
+  gl.command = function() {
+    // TODO: consider what should be done if the command is 'insert' or 'remove'
+    if (!assertNumberOfArguments(arguments, 1, 'command')) return;
+    if (!assert(command[arguments[0]] != null, "Unknown command '" + command[arguments[0]] + "' used.")) return;
+    commands.push(command[arguments[0]], (command[arguments[1]] != null? command[arguments[1]] : null), Array.prototype.slice.call(arguments, 2));
+    return gl;
+  };
+

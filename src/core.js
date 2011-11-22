@@ -4,6 +4,8 @@
   },
   // The scenes, each of which contains a hierarchy of identifiers
   scenes = {},
+  // Commands to be executed
+  commands = [],
   // All shader definitions
   shaders = {},
   // Buckets that hold renderer state
@@ -28,10 +30,10 @@
   },
   assertNumberOfArguments = function(args, minNumber, parentFunction) {
     if (parentFunction != null)
-      return assert(args.length >= minNumber, "In call to '" + parentFunction + "', expected at least " + minNumber + " arguments. Instead, got " + args.length ".");
+      return assert(args.length >= minNumber, "In call to '" + parentFunction + "', expected at least " + minNumber + " arguments. Instead, got " + args.length + ".");
     else
-      return assert(args.length >= minNumber, "Expected at least " + minNumber + " arguments. Instead, got " + args.length ".");
-  }
+      return assert(args.length >= minNumber, "Expected at least " + minNumber + " arguments. Instead, got " + args.length + ".");
+  },
   // The last identifer number that was generated automatically
   lastId = 0,
   // Automatically generate a new object identifier

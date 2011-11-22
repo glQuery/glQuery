@@ -12,6 +12,8 @@ var glQuery = (function() {
   },
   // The scenes, each of which contains a hierarchy of identifiers
   scenes = {},
+  // Commands to be executed
+  commands = [],
   // All shader definitions
   shaders = {},
   // Buckets that hold renderer state
@@ -23,16 +25,22 @@ var glQuery = (function() {
   logError = function(msg) { console.log(msg); },
   // Run-time checks
   // TODO: Should we provide checks that throw exceptions rather than logging messages?
-  assert = function(condition, msg) { if (!condition) logError(msg); },
+  assert = function(condition, msg) { if (!condition) logError(msg); return condition; },
   assertType = function(param, typeStr, parentFunction, paramStr) {
     if (paramStr != null && parentFunction != null)
-      assert(typeof param === typeStr, "In call to '" + parentFunction + "', expected type '" + typeStr + "' for '" + paramStr + "'. Instead, got type '" + typeof param + "'.");
+      return assert(typeof param === typeStr, "In call to '" + parentFunction + "', expected type '" + typeStr + "' for '" + paramStr + "'. Instead, got type '" + typeof param + "'.");
     else if (parentFunction != null)
-      assert(typeof param === typeStr, "In call to '" + parentFunction + "', expected type '" + typeStr + "'. Instead, got type '" + typeof param + "'.");
+      return assert(typeof param === typeStr, "In call to '" + parentFunction + "', expected type '" + typeStr + "'. Instead, got type '" + typeof param + "'.");
     else if (paramStr != null)
-      assert(typeof param === typeStr, "Expected type '" + typeStr + "' for '" + paramStr + "'. Instead, got type '" + typeof param + "'.");
+      return assert(typeof param === typeStr, "Expected type '" + typeStr + "' for '" + paramStr + "'. Instead, got type '" + typeof param + "'.");
     else
-      assert(typeof param === typeStr, "Expected type '" + typeStr + "'. Instead, got type '" + typeof param + "'.");
+      return assert(typeof param === typeStr, "Expected type '" + typeStr + "'. Instead, got type '" + typeof param + "'.");
+  },
+  assertNumberOfArguments = function(args, minNumber, parentFunction) {
+    if (parentFunction != null)
+      return assert(args.length >= minNumber, "In call to '" + parentFunction + "', expected at least " + minNumber + " arguments. Instead, got " + args.length + ".");
+    else
+      return assert(args.length >= minNumber, "Expected at least " + minNumber + " arguments. Instead, got " + args.length + ".");
   },
   // The last identifer number that was generated automatically
   lastId = 0,
@@ -573,8 +581,20 @@ var glQuery = (function() {
   ];
   assert(commandDispatch.length == command.light + 1, "Internal Error: Number of commands in commandDispatch is incorrect.");
   
+  // Execute a command
+  gl.command = function() {
+    // TODO: consider what should be done if the command is 'insert' or 'remove'
+    if (!assertNumberOfArguments(arguments, 1, 'command')) return;
+    if (!assert(command[arguments[0]] != null, "Unknown command '" + command[arguments[0]] + "' used.")) return;
+    commands.push(command[arguments[0]], (command[arguments[1]] != null? command[arguments[1]] : null), Array.prototype.slice.call(arguments, 2));
+    return gl;
+  };
+  var execCommand = function(command, selector, commandArgs) {
+  };
 
   // glQuery API
+  // Note: According to https://developer.mozilla.org/en/JavaScript/Reference/Functions_and_function_scope/arguments
+  //       arguments is not a proper Array object, so assume arguments.slice is not implemented.
   gl.fn = gl.prototype = {
     init: function(selector) {
       //logDebug("init");
@@ -586,28 +606,41 @@ var glQuery = (function() {
       assertType(context, 'object', 'render', 'context');
       return this;
     },
+    command: function() {
+      // TODO: consider what should be done if the command is 'insert' or 'remove'
+      if (!assertNumberOfArguments(arguments, 1, 'command')) return;
+      if (!assert(command[arguments[0]] != null, "Unknown command '" + command[arguments[0]] + "' used.")) return;
+      commands.push(command[arguments[0]], this._selector, Array.prototype.slice.call(arguments, 1));
+      return this;
+    },
     shaderProgram: function() {
       logDebug("shaderProgram");
+      commands.push(command.shaderProgram, this._selector, Array.prototype.slice.call(arguments));
       return this;
     },
     triangles: function() {
       logDebug("triangles");
+      commands.push(command.triangles, this._selector, Array.prototype.slice.call(arguments));
       return this;
     },
     indices: function() {
       logDebug("indices");
+      commands.push(command.indices, this._selector, Array.prototype.slice.call(arguments));
       return this;
     },
     vertices: function() {
       logDebug("vertices");
+      commands.push(command.vertices, this._selector, Array.prototype.slice.call(arguments));
       return this;
     },
     material: function() {
       logDebug("material");
+      commands.push(command.material, this._selector, Array.prototype.slice.call(arguments));
       return this;
     },
     light: function() {
       logDebug("light");
+      commands.push(command.light, this._selector, Array.prototype.slice.call(arguments));
       return this;
     },
     length: 0
