@@ -60,7 +60,6 @@
       logDebug("light");
       commands.push(command.light, this._selector, Array.prototype.slice.call(arguments));
       return this;
-    },
-    length: 0
+    }
   };
 
