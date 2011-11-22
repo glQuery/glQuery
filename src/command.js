@@ -40,7 +40,12 @@
   ];
   assert(commandDispatch.length == command.light + 1, "Internal Error: Number of commands in commandDispatch is incorrect.");
   
-  // Execute a command
+  // Execute a command taken from the queue
+  var dispatchCommand = function(key, selector, commandArgs) {
+    commandDispatch[key](selector, commandArgs);
+  };
+    
+  // Append a command to the stream
   gl.command = function() {
     // TODO: consider what should be done if the command is 'insert' or 'remove'
     if (!assertNumberOfArguments(arguments, 1, 'command')) return gl;
