@@ -9,7 +9,8 @@
         rootIds.push(sceneDef);
       }
       else {
-        assert(typeof sceneDef === 'object', "In call to 'scene', expected type 'string' or 'object' for 'sceneDef'. Instead, got type '" + typeof sceneDef + "'.");
+        if (!assert(typeof sceneDef === 'object', "In call to 'scene', expected type 'string' or 'object' for 'sceneDef'. Instead, got type '" + typeof sceneDef + "'."))
+          return apiDummy;
 
         // Normalize the scene node
         var normalizedScene = normalizeNodes(sceneDef);

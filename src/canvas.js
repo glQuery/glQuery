@@ -2,6 +2,13 @@
   gl.canvas = function(htmlCanvas, contextAttr, width, height) {
     var canvasId, canvasEl;
     logDebug("canvas");
+    var dummy = {
+      start: function() { return this; },
+      clear: function() { return this; },
+      clearColor: function() { return this; },
+      clearDepth: function() { return this; },
+      clearStencil: function() { return this; }
+    };
     if (typeof htmlCanvas === 'undefined') {
       // Create canvas element
       canvasId = 'glqueryCanvas';
@@ -10,19 +17,21 @@
     }
     else {
       // Get existing canvas element
-      assert(typeof htmlCanvas === 'string' || (typeof htmlCanvas === 'object' && htmlCanvas.nodeName !== 'CANVAS'), "In call to 'canvas', expected type 'string', 'undefined' or 'canvas element' for 'htmlCanvas'. Instead, got type '" + typeof htmlCanvas + "'.");
+      if (!assert(typeof htmlCanvas === 'string' || (typeof htmlCanvas === 'object' && htmlCanvas.nodeName !== 'CANVAS'), "In call to 'canvas', expected type 'string', 'undefined' or 'canvas element' for 'htmlCanvas'. Instead, got type '" + typeof htmlCanvas + "'."))
+        return dummy;
       canvasId = typeof htmlCanvas === 'string'? htmlCanvas : htmlCanvas.id;
       canvasEl = typeof htmlCanvas === 'object'? htmlCanvas : document.getElementById(canvasId);
     }
-    assert(canvasEl != null && typeof canvasEl === 'object' && canvasEl.nodeName === 'CANVAS', "In call to 'canvas', could not initialize canvas element.");
+    if (!assert(canvasEl != null && typeof canvasEl === 'object' && canvasEl.nodeName === 'CANVAS', "In call to 'canvas', could not initialize canvas element."))
+      return dummy;
     if (canvasId != null)
       logInfo("Initialized canvas: " + canvasId);
     else
       logInfo("Initialized canvas");
     // Initialize the WebGL context
     var canvasCtx = canvasEl.getContext('experimental-webgl', contextAttr);
-    if (!canvasCtx)
-      assert(false, "Could not get a 'experimental-webgl' context.");
+    if (!assert(canvasCtx != null, "Could not get a 'experimental-webgl' context."))
+      return dummy;
 
     // Wrap glQuery canvas
     return (function() { 
@@ -44,7 +53,7 @@
         start: function(rootId) {
           logDebug("canvas.start");
           if (rootId != null) {
-            assertType(rootId, 'string', 'canvas.start', 'rootId');
+            if (!assertType(rootId, 'string', 'canvas.start', 'rootId')) return this;
             self.rootId = rootId;
             self.nextFrame = window.requestAnimationFrame(self.callback(), self.ctx.canvas);
           }

@@ -584,17 +584,28 @@ var glQuery = (function() {
   // Execute a command
   gl.command = function() {
     // TODO: consider what should be done if the command is 'insert' or 'remove'
-    if (!assertNumberOfArguments(arguments, 1, 'command')) return;
-    if (!assert(command[arguments[0]] != null, "Unknown command '" + command[arguments[0]] + "' used.")) return;
+    if (!assertNumberOfArguments(arguments, 1, 'command')) return gl;
+    if (!assert(command[arguments[0]] != null, "Unknown command '" + command[arguments[0]] + "' used.")) return gl;
     commands.push(command[arguments[0]], (command[arguments[1]] != null? command[arguments[1]] : null), Array.prototype.slice.call(arguments, 2));
     return gl;
   };
-  var execCommand = function(command, selector, commandArgs) {
-  };
+
 
   // glQuery API
   // Note: According to https://developer.mozilla.org/en/JavaScript/Reference/Functions_and_function_scope/arguments
   //       arguments is not a proper Array object, so assume arguments.slice is not implemented.
+  var apiDummy = {
+    init: function() { return this; },
+    render: function() { return this; },
+    command: function() { return this; },
+    shaderProgram: function() { return this; },
+    triangles: function() { return this; },
+    indices: function() { return this; },
+    vertices: function() { return this; },
+    material: function() { return this; },
+    light: function() { return this; }
+  };
+
   gl.fn = gl.prototype = {
     init: function(selector) {
       //logDebug("init");
@@ -603,13 +614,13 @@ var glQuery = (function() {
     },
     render: function(context) {
       //logDebug("render");
-      assertType(context, 'object', 'render', 'context');
+      if (!assertType(context, 'object', 'render', 'context')) return this;
       return this;
     },
     command: function() {
       // TODO: consider what should be done if the command is 'insert' or 'remove'
-      if (!assertNumberOfArguments(arguments, 1, 'command')) return;
-      if (!assert(command[arguments[0]] != null, "Unknown command '" + command[arguments[0]] + "' used.")) return;
+      if (!assertNumberOfArguments(arguments, 1, 'command')) return this;
+      if (!assert(command[arguments[0]] != null, "Unknown command '" + command[arguments[0]] + "' used.")) return this;
       commands.push(command[arguments[0]], this._selector, Array.prototype.slice.call(arguments, 1));
       return this;
     },
@@ -646,10 +657,18 @@ var glQuery = (function() {
     length: 0
   };
 
+
   // Initialize a webgl canvas
   gl.canvas = function(htmlCanvas, contextAttr, width, height) {
     var canvasId, canvasEl;
     logDebug("canvas");
+    var dummy = {
+      start: function() { return this; },
+      clear: function() { return this; },
+      clearColor: function() { return this; },
+      clearDepth: function() { return this; },
+      clearStencil: function() { return this; }
+    };
     if (typeof htmlCanvas === 'undefined') {
       // Create canvas element
       canvasId = 'glqueryCanvas';
@@ -658,19 +677,21 @@ var glQuery = (function() {
     }
     else {
       // Get existing canvas element
-      assert(typeof htmlCanvas === 'string' || (typeof htmlCanvas === 'object' && htmlCanvas.nodeName !== 'CANVAS'), "In call to 'canvas', expected type 'string', 'undefined' or 'canvas element' for 'htmlCanvas'. Instead, got type '" + typeof htmlCanvas + "'.");
+      if (!assert(typeof htmlCanvas === 'string' || (typeof htmlCanvas === 'object' && htmlCanvas.nodeName !== 'CANVAS'), "In call to 'canvas', expected type 'string', 'undefined' or 'canvas element' for 'htmlCanvas'. Instead, got type '" + typeof htmlCanvas + "'."))
+        return dummy;
       canvasId = typeof htmlCanvas === 'string'? htmlCanvas : htmlCanvas.id;
       canvasEl = typeof htmlCanvas === 'object'? htmlCanvas : document.getElementById(canvasId);
     }
-    assert(canvasEl != null && typeof canvasEl === 'object' && canvasEl.nodeName === 'CANVAS', "In call to 'canvas', could not initialize canvas element.");
+    if (!assert(canvasEl != null && typeof canvasEl === 'object' && canvasEl.nodeName === 'CANVAS', "In call to 'canvas', could not initialize canvas element."))
+      return dummy;
     if (canvasId != null)
       logInfo("Initialized canvas: " + canvasId);
     else
       logInfo("Initialized canvas");
     // Initialize the WebGL context
     var canvasCtx = canvasEl.getContext('experimental-webgl', contextAttr);
-    if (!canvasCtx)
-      assert(false, "Could not get a 'experimental-webgl' context.");
+    if (!assert(canvasCtx != null, "Could not get a 'experimental-webgl' context."))
+      return dummy;
 
     // Wrap glQuery canvas
     return (function() { 
@@ -692,7 +713,7 @@ var glQuery = (function() {
         start: function(rootId) {
           logDebug("canvas.start");
           if (rootId != null) {
-            assertType(rootId, 'string', 'canvas.start', 'rootId');
+            if (!assertType(rootId, 'string', 'canvas.start', 'rootId')) return this;
             self.rootId = rootId;
             self.nextFrame = window.requestAnimationFrame(self.callback(), self.ctx.canvas);
           }
@@ -733,7 +754,8 @@ var glQuery = (function() {
         rootIds.push(sceneDef);
       }
       else {
-        assert(typeof sceneDef === 'object', "In call to 'scene', expected type 'string' or 'object' for 'sceneDef'. Instead, got type '" + typeof sceneDef + "'.");
+        if (!assert(typeof sceneDef === 'object', "In call to 'scene', expected type 'string' or 'object' for 'sceneDef'. Instead, got type '" + typeof sceneDef + "'."))
+          return apiDummy;
 
         // Normalize the scene node
         var normalizedScene = normalizeNodes(sceneDef);
