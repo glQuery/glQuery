@@ -15,17 +15,23 @@
   logError = function(msg) { console.log(msg); },
   // Run-time checks
   // TODO: Should we provide checks that throw exceptions rather than logging messages?
-  assert = function(condition, msg) { if (!condition) logError(msg); },
+  assert = function(condition, msg) { if (!condition) logError(msg); return condition; },
   assertType = function(param, typeStr, parentFunction, paramStr) {
     if (paramStr != null && parentFunction != null)
-      assert(typeof param === typeStr, "In call to '" + parentFunction + "', expected type '" + typeStr + "' for '" + paramStr + "'. Instead, got type '" + typeof param + "'.");
+      return assert(typeof param === typeStr, "In call to '" + parentFunction + "', expected type '" + typeStr + "' for '" + paramStr + "'. Instead, got type '" + typeof param + "'.");
     else if (parentFunction != null)
-      assert(typeof param === typeStr, "In call to '" + parentFunction + "', expected type '" + typeStr + "'. Instead, got type '" + typeof param + "'.");
+      return assert(typeof param === typeStr, "In call to '" + parentFunction + "', expected type '" + typeStr + "'. Instead, got type '" + typeof param + "'.");
     else if (paramStr != null)
-      assert(typeof param === typeStr, "Expected type '" + typeStr + "' for '" + paramStr + "'. Instead, got type '" + typeof param + "'.");
+      return assert(typeof param === typeStr, "Expected type '" + typeStr + "' for '" + paramStr + "'. Instead, got type '" + typeof param + "'.");
     else
-      assert(typeof param === typeStr, "Expected type '" + typeStr + "'. Instead, got type '" + typeof param + "'.");
+      return assert(typeof param === typeStr, "Expected type '" + typeStr + "'. Instead, got type '" + typeof param + "'.");
   },
+  assertNumberOfArguments = function(args, minNumber, parentFunction) {
+    if (parentFunction != null)
+      return assert(args.length >= minNumber, "In call to '" + parentFunction + "', expected at least " + minNumber + " arguments. Instead, got " + args.length ".");
+    else
+      return assert(args.length >= minNumber, "Expected at least " + minNumber + " arguments. Instead, got " + args.length ".");
+  }
   // The last identifer number that was generated automatically
   lastId = 0,
   // Automatically generate a new object identifier
