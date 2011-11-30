@@ -6,10 +6,10 @@
   scenes = {},
   // Commands to be executed
   commands = [],
+  // Commands associated with a tag
+  tagCommands = {},
   // All shader definitions
   shaders = {},
-  // Buckets that hold renderer state
-  buckets = {},
   // Logging / information methods
   logDebug = function(msg) { console.log(msg); },
   logInfo = function(msg) { console.log(msg); },
@@ -61,10 +61,10 @@
           r[key] = val;
           break;
         case 'object':
-          r[key] = val;
+          r[key] = val; // TODO: should this be normalized?
           break;
         default:
-          
+          // TODO: ? (array perhaps?)
       }
     }
     return r;

@@ -14,14 +14,15 @@
   };
 
   gl.fn = gl.prototype = {
-    init: function(selector) {
+    init: function() {
       //logDebug("init");
-      this._selector = selector;
+      this._selector = Array.prototype.slice.call(arguments);
       return this;
     },
     render: function(context) {
       //logDebug("render");
       if (!assertType(context, 'object', 'render', 'context')) return this;
+      // TODO: assert that the context is a webgl context specifically     
       return this;
     },
     command: function() {
@@ -38,7 +39,12 @@
     },
     triangles: function() {
       logDebug("triangles");
-      commands.push(command.triangles, this._selector, Array.prototype.slice.call(arguments));
+      commands.push(command.geometry, this._selector, [gl.TRIANGLES]);
+      return this;
+    },
+    vertexAttrib: function() {
+      logDebug("vertexAttrib");
+      commands.push(command.vertexAttribute, this._selector, Array.prototype.slice.call(arguments));
       return this;
     },
     indices: function() {

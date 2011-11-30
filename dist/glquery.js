@@ -1,7 +1,7 @@
 /*
- * glQuery
- * Originaly copyright glQuery authors 2011, but is released into the public domain.
- * (Also available under an MIT license and a GPL v2.0 license)
+ * glQuery - A fluent WebGL engine (https://github.com/glQuery)
+ * glQuery is free, public domain software (http://creativecommons.org/publicdomain/zero/1.0/)
+ * Originally created by Rehno Lindeque of http://www.mischievousmeerkat.com
  */
 "use strict";
 var glQuery = (function() {
@@ -14,10 +14,10 @@ var glQuery = (function() {
   scenes = {},
   // Commands to be executed
   commands = [],
+  // Commands associated with a tag
+  tagCommands = {},
   // All shader definitions
   shaders = {},
-  // Buckets that hold renderer state
-  buckets = {},
   // Logging / information methods
   logDebug = function(msg) { console.log(msg); },
   logInfo = function(msg) { console.log(msg); },
@@ -69,10 +69,10 @@ var glQuery = (function() {
           r[key] = val;
           break;
         case 'object':
-          r[key] = val;
+          r[key] = val; // TODO: should this be normalized?
           break;
         default:
-          
+          // TODO: ? (array perhaps?)
       }
     }
     return r;
@@ -543,41 +543,133 @@ var glQuery = (function() {
     insert: 0,
     remove: 1,
     shaderProgram: 2,
-    triangles: 3,
-    vertices: 4,
-    normals: 5,
-    indices: 6,
-    material: 7,
-    light: 8
+    geometry: 3,
+    vertexAttribBuffer: 4,
+    vertexAttrib1: 5,
+    vertexAttrib2: 6,
+    vertexAttrib3: 7,
+    vertexAttrib4: 8,
+    vertices: 9,
+    normals: 10,
+    indices: 11,
+    material: 12,
+    light: 12
   },
   commandDispatch = [
     // insert: 0
-    function() {
+    function(selector, args) {
+      logDebug("dispatch command: insert");
     },
     // remove: 1
-    function() {
+    function(selector, args) {
+      logDebug("dispatch command: remove");
     },
     // shaderProgram: 2
-    function() {
+    function(selector, args) {
+      logDebug("dispatch command: shaderProgram");
+      if (args.length > 0) {
+        for (var i = 0; i < selector.length; ++i) {
+          var commandsStruct = (typeof tagCommands[selector[i]] == 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
+          commandsStruct[command.shaderProgram] = args;
+        }
+      }
+      else {
+        for (var i = 0; i < selector.length; ++i)
+          if (typeof tagCommands[selector[i]] !== 'undefined')
+            delete tagCommands[selector[i]][command.shaderProgram];
+      }
     },
-    // triangles: 3
-    function() {
+    // geometry: 3
+    function(selector, args) {
+      logDebug("dispatch command: geometry");
+      if (args.length > 0) {
+        for (var i = 0; i < selector.length; ++i) {
+          var commandsStruct = (typeof tagCommands[selector[i]] == 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
+          commandsStruct[command.geometry] = args[0];
+        }
+      }
+      else {
+        for (var i = 0; i < selector.length; ++i)
+          if (typeof tagCommands[selector[i]] !== 'undefined')
+            delete tagCommands[selector[i]][command.geometry];
+      }
     },
-    // vertices: 4
-    function() {
+    // vertexAttribBuffer: 4
+    function(selector,args) {
+      logDebug("dispatch command: vertexAttribBuffer");
+      if (args.length > 1) {
+        for (var i = 0; i < selector.length; ++i) {
+          var commandsStruct = (typeof tagCommands[selector[i]] == 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
+          commandsStruct[command.vertexAttribute] = args;
+        }
+      }
+      else {
+        for (var i = 0; i < selector.length; ++i)
+          if (typeof tagCommands[selector[i]] !== 'undefined')
+            delete tagCommands[selector[i]][command.vertexAttribute];
+      }
     },
-    // normals: 5
-    function() {
+    // vertexAttrib1: 5
+    function(selector,args) {
+      logDebug("dispatch command: vertexAttrib1");
     },
-    // indices: 6
-    function() {
+    // vertexAttrib2: 6
+    function(selector,args) {
+      logDebug("dispatch command: vertexAttrib2");
     },
-    // material: 7
-    function() {
+    // vertexAttrib3: 7
+    function(selector,args) {
+      logDebug("dispatch command: vertexAttrib3");
     },
-    // light: 8
-    function() {
+    // vertexAttrib4: 8
+    function(selector,args) {
+      logDebug("dispatch command: vertexAttrib4");
     },
+
+    /*// vertices: 5
+    function(selector,args) {
+      logDebug("dispatch command: vertices");
+      /*if (args.length > 0) {
+        for (var i = 0; i < selector.length; ++i) {
+          var commandsStruct = (typeof tagCommands[selector[i]] == 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]];
+          // TODO: convert argument into a buffer object first... (if it isn't already)
+          commandsStruct[command.vertices] = args[0];
+        }
+      }
+      else {
+        for (var i = 0; i < selector.length; ++i)
+          if (typeof tagCommands[selector[i]] !== 'undefined')
+            delete tagCommands[selector[i]][command.vertices];
+      }* /
+    },
+    // normals: 6
+    function(selector, args) {
+      logDebug("dispatch command: normals");
+    },
+    // indices: 7
+    function(selector, args) {
+      logDebug("dispatch command: indices");
+      /*if (args.length > 0) {
+        for (var i = 0; i < selector.length; ++i) {
+          var commandsStruct = (typeof tagCommands[selector[i]] == 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]];
+          // TODO: convert argument into a buffer object first... (if it isn't already)
+          commandsStruct[command.indices] = args[0];
+        }
+      }
+      else {
+        for (var i = 0; i < selector.length; ++i)
+          if (typeof tagCommands[selector[i]] !== 'undefined')
+            delete tagCommands[selector[i]][command.indices];
+      }* /
+    },
+    // material: 8
+    function(selector, args) {
+      logDebug("dispatch command: material");
+    },
+    // light: 9
+    function(selector, args) {
+      logDebug("dispatch command: light");
+    }*/
   ];
   assert(commandDispatch.length == command.light + 1, "Internal Error: Number of commands in commandDispatch is incorrect.");
   
@@ -612,14 +704,15 @@ var glQuery = (function() {
   };
 
   gl.fn = gl.prototype = {
-    init: function(selector) {
+    init: function() {
       //logDebug("init");
-      this._selector = selector;
+      this._selector = Array.prototype.slice.call(arguments);
       return this;
     },
     render: function(context) {
       //logDebug("render");
       if (!assertType(context, 'object', 'render', 'context')) return this;
+      // TODO: assert that the context is a webgl context specifically     
       return this;
     },
     command: function() {
@@ -636,7 +729,12 @@ var glQuery = (function() {
     },
     triangles: function() {
       logDebug("triangles");
-      commands.push(command.triangles, this._selector, Array.prototype.slice.call(arguments));
+      commands.push(command.geometry, this._selector, [gl.TRIANGLES]);
+      return this;
+    },
+    vertexAttrib: function() {
+      logDebug("vertexAttrib");
+      commands.push(command.vertexAttribute, this._selector, Array.prototype.slice.call(arguments));
       return this;
     },
     indices: function() {
@@ -766,6 +864,7 @@ var glQuery = (function() {
         for (key in normalizedScene) {
           rootIds.push(key);
           scenes[key] = normalizedScene[key];
+          // TODO: generate the paths for each tag in the normalized scene
         }
       }
     }
@@ -784,9 +883,10 @@ var glQuery = (function() {
     if (typeof code == null) {
       delete shaders[id];
     } else {
-      assertType(code, 'string', 'shader', 'code');
+      if (!assertType(code, 'string', 'shader', 'code')) return gl;
       shaders[id] = code;
     }
+    return gl;
   };
 
   gl.worker = function(workerId, js) {
