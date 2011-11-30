@@ -44,7 +44,7 @@
     },
     vertexAttrib: function() {
       logDebug("vertexAttrib");
-      commands.push(command.vertexAttribute, this._selector, Array.prototype.slice.call(arguments));
+      commands.push(command.vertexAttribBuffer, this._selector, Array.prototype.slice.call(arguments));
       return this;
     },
     indices: function() {
