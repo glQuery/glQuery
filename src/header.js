@@ -1,7 +1,7 @@
 /*
- * glQuery
- * Originaly copyright glQuery authors 2011, but is released into the public domain.
- * (Also available under an MIT license and a GPL v2.0 license)
+ * glQuery - A fluent WebGL engine (https://github.com/glQuery)
+ * glQuery is free, public domain software (http://creativecommons.org/publicdomain/zero/1.0/)
+ * Originally created by Rehno Lindeque of http://www.mischievousmeerkat.com
  */
 "use strict";
 var glQuery = (function() {
