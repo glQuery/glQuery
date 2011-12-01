@@ -83,8 +83,8 @@ var glQuery = (function() {
             logError("The given nodes contain a 'prototype' object. ");
             continue;
           } 
-          var val = normalizeNodes(nodes[key]);
-          result[key] = (val != null? val : []);
+          var node = normalizeNodes(nodes[key]);
+          result[key] = (Array.isArray(node)? node : (node != null? [node] : []));
         }
         return result;
     }
@@ -551,6 +551,11 @@ var glQuery = (function() {
   gl.BROWSER_DEFAULT_WEBGL          = 0x9244;
 
 
+  // A module for managing (WebGL) state
+  var updateStateHashes = function(node) {
+    
+  }
+
   var command = {
     insert: 0,
     remove: 1,
@@ -702,18 +707,6 @@ var glQuery = (function() {
   // glQuery API
   // Note: According to https://developer.mozilla.org/en/JavaScript/Reference/Functions_and_function_scope/arguments
   //       arguments is not a proper Array object, so assume arguments.slice is not implemented.
-  var apiDummy = {
-    init: function() { return this; },
-    render: function() { return this; },
-    command: function() { return this; },
-    shaderProgram: function() { return this; },
-    triangles: function() { return this; },
-    indices: function() { return this; },
-    vertices: function() { return this; },
-    material: function() { return this; },
-    light: function() { return this; }
-  };
-
   gl.fn = gl.prototype = {
     init: function() {
       //logDebug("init");
@@ -768,6 +761,11 @@ var glQuery = (function() {
       commands.push(command.light, this._selector, Array.prototype.slice.call(arguments));
       return this;
     }
+  };
+
+  var apiDummy = {};
+  for (var key in gl.fn) {
+    apiDummy[key] = function() { return this; };
   };
 
 
@@ -881,7 +879,7 @@ var glQuery = (function() {
           continue;
         default:
           if (!assert(typeof sceneDef === 'object', "In call to 'scene', expected type 'string' ,'number' or 'object' for 'sceneDef'. Instead, got type '" + typeof sceneDef + "'."))
-            return apiDummy;
+            continue;
           var normalizedScene = normalizeNodes(sceneDef);
           if (normalizedScene != null) {
             for (key in normalizedScene) {
@@ -891,12 +889,20 @@ var glQuery = (function() {
           }
       }
     }
-    if (rootIds.length === 0) {
-      rootIds = generateId();
-      scenes[rootIds] = [];
-      logWarning("In call to 'scene', no nodes supplied. Generating a single root node.");
+    if (arguments.length === 0) {
+      scenes = {}; // Clear the scenes
+      return apiDummy;
     }
-    // TODO: generate the paths for each tag in the normalized scene?
+    if (rootIds.length === 0) {
+      logApiError("could not create scene from the given scene definition.");
+      return apiDummy;
+    }
+    // Generate the paths for each tag in the normalized scene?
+    // TODO
+    // Update the state hashes for each of the root ids
+    for (var i = 0; i < rootIds.length; ++i) {
+      updateStateHashes(scenes[rootIds]);
+    }
     return gl.fn.init(rootIds);
   };
 

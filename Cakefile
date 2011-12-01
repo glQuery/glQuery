@@ -7,6 +7,7 @@ libFiles  = [
   'header'
   'core'
   'webgl-constants'
+  'state'
   'command'
   'api'
   'canvas'

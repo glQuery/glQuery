@@ -57,6 +57,7 @@
     }
   };
 
+  // Create a dummy API which behaves like a stand-in builder object when the selector fails
   var apiDummy = {};
   for (var key in gl.fn) {
     apiDummy[key] = function() { return this; };

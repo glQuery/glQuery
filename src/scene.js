@@ -23,7 +23,7 @@
           continue;
         default:
           if (!assert(typeof sceneDef === 'object', "In call to 'scene', expected type 'string' ,'number' or 'object' for 'sceneDef'. Instead, got type '" + typeof sceneDef + "'."))
-            return apiDummy;
+            continue;
           var normalizedScene = normalizeNodes(sceneDef);
           if (normalizedScene != null) {
             for (key in normalizedScene) {
@@ -33,12 +33,20 @@
           }
       }
     }
-    if (rootIds.length === 0) {
-      rootIds = generateId();
-      scenes[rootIds] = [];
-      logWarning("In call to 'scene', no nodes supplied. Generating a single root node.");
+    if (arguments.length === 0) {
+      scenes = {}; // Clear the scenes
+      return apiDummy;
     }
-    // TODO: generate the paths for each tag in the normalized scene?
+    if (rootIds.length === 0) {
+      logApiError("could not create scene from the given scene definition.");
+      return apiDummy;
+    }
+    // Generate the paths for each tag in the normalized scene?
+    // TODO
+    // Update the state hashes for each of the root ids
+    for (var i = 0; i < rootIds.length; ++i) {
+      updateStateHashes(scenes[rootIds]);
+    }
     return gl.fn.init(rootIds);
   };
 
