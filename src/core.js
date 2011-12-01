@@ -44,19 +44,23 @@
     if (Array.isArray(nodes)) {
       // Automatically generate a parent id and normalize all child nodes
       var resultNodes = [];
+      resultNodes.hashes = {};
+      resultNodes.prevUpdate = true;
       for (var i = 0; i < nodes.length; ++i) {
         var resultNode = normalizeNodes(nodes[i])
-        if (typeof resultNode != null)
+        if (Array.isArray(nodes)) {
+          // Don't nest arrays, generate a new id for the node instead
+          var obj = {};
+          obj[generateId()] = resultNodes;
+          resultNodes.push(obj);
+        }
+        if (resultNode != null)
           resultNodes.push(resultNode);
         else
           // TODO: In call to either scene or insert....
           logApiError('scene', "could not normalize the node with type '" + (typeof nodes[i]) + "'.");
       }
-      if (resultNodes.length == 0)
-        return;
-      var result = {};
-      result[generateId()] = resultNodes;
-      return result;
+      return resultNodes;
     }
     switch (typeof nodes) {
       case 'string':
