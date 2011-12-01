@@ -15,6 +15,7 @@
   logInfo = function(msg) { console.log(msg); },
   logWarning = function(msg) { console.log(msg); },
   logError = function(msg) { console.log(msg); },
+  logApiError = function(func,msg) { console.log("In call to '" + func + "', " + msg); },
   // Run-time checks
   // TODO: Should we provide checks that throw exceptions rather than logging messages?
   assert = function(condition, msg) { if (!condition) logError(msg); return condition; },
@@ -42,32 +43,39 @@
   normalizeNodes = function(nodes) {
     if (Array.isArray(nodes)) {
       // Automatically generate a parent id and normalize all child nodes
-      for (var i = 0; i < nodes.length; ++i)
-        nodes[i] = normalizeNodes(nodes[i]);
-      var r = {};
-      r[generateId()] = nodes;
-      return r;
-    }
-    // TODO: normalize key-value pairs
-    var r = {};
-    for (var key in nodes) {
-      var val = nodes[key];
-      if (key === 'prototype') {
-        logError("The given nodes contain a 'prototype' object. ");
-        continue;
-      } 
-      switch (typeof val) {
-        case 'string': 
-          r[key] = val;
-          break;
-        case 'object':
-          r[key] = val; // TODO: should this be normalized?
-          break;
-        default:
-          // TODO: ? (array perhaps?)
+      var resultNodes = [];
+      for (var i = 0; i < nodes.length; ++i) {
+        var resultNode = normalizeNodes(nodes[i])
+        if (typeof resultNode != null)
+          resultNodes.push(resultNode);
+        else
+          // TODO: In call to either scene or insert....
+          logApiError('scene', "could not normalize the node with type '" + (typeof nodes[i]) + "'.");
       }
+      if (resultNodes.length == 0)
+        return;
+      var result = {};
+      result[generateId()] = resultNodes;
+      return result;
     }
-    return r;
+    switch (typeof nodes) {
+      case 'string':
+        return nodes;
+      case 'number':
+        return String(nodes);
+      case 'object':
+        var result = {};
+        // TODO: normalize key-value pairs
+        for (var key in nodes) {
+          if (key === 'prototype') {
+            logError("The given nodes contain a 'prototype' object. ");
+            continue;
+          } 
+          var val = normalizeNodes(nodes[key]);
+          result[key] = (val != null? val : []);
+        }
+        return result;
+    }
   };
 
   // Cross-browser initialization

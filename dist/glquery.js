@@ -23,6 +23,7 @@ var glQuery = (function() {
   logInfo = function(msg) { console.log(msg); },
   logWarning = function(msg) { console.log(msg); },
   logError = function(msg) { console.log(msg); },
+  logApiError = function(func,msg) { console.log("In call to '" + func + "', " + msg); },
   // Run-time checks
   // TODO: Should we provide checks that throw exceptions rather than logging messages?
   assert = function(condition, msg) { if (!condition) logError(msg); return condition; },
@@ -50,32 +51,39 @@ var glQuery = (function() {
   normalizeNodes = function(nodes) {
     if (Array.isArray(nodes)) {
       // Automatically generate a parent id and normalize all child nodes
-      for (var i = 0; i < nodes.length; ++i)
-        nodes[i] = normalizeNodes(nodes[i]);
-      var r = {};
-      r[generateId()] = nodes;
-      return r;
-    }
-    // TODO: normalize key-value pairs
-    var r = {};
-    for (var key in nodes) {
-      var val = nodes[key];
-      if (key === 'prototype') {
-        logError("The given nodes contain a 'prototype' object. ");
-        continue;
-      } 
-      switch (typeof val) {
-        case 'string': 
-          r[key] = val;
-          break;
-        case 'object':
-          r[key] = val; // TODO: should this be normalized?
-          break;
-        default:
-          // TODO: ? (array perhaps?)
+      var resultNodes = [];
+      for (var i = 0; i < nodes.length; ++i) {
+        var resultNode = normalizeNodes(nodes[i])
+        if (typeof resultNode != null)
+          resultNodes.push(resultNode);
+        else
+          // TODO: In call to either scene or insert....
+          logApiError('scene', "could not normalize the node with type '" + (typeof nodes[i]) + "'.");
       }
+      if (resultNodes.length == 0)
+        return;
+      var result = {};
+      result[generateId()] = resultNodes;
+      return result;
     }
-    return r;
+    switch (typeof nodes) {
+      case 'string':
+        return nodes;
+      case 'number':
+        return String(nodes);
+      case 'object':
+        var result = {};
+        // TODO: normalize key-value pairs
+        for (var key in nodes) {
+          if (key === 'prototype') {
+            logError("The given nodes contain a 'prototype' object. ");
+            continue;
+          } 
+          var val = normalizeNodes(nodes[key]);
+          result[key] = (val != null? val : []);
+        }
+        return result;
+    }
   };
 
   // Cross-browser initialization
@@ -553,7 +561,7 @@ var glQuery = (function() {
     normals: 10,
     indices: 11,
     material: 12,
-    light: 12
+    light: 13
   },
   commandDispatch = [
     // insert: 0
@@ -625,8 +633,7 @@ var glQuery = (function() {
     function(selector,args) {
       logDebug("dispatch command: vertexAttrib4");
     },
-
-    /*// vertices: 5
+    // vertices: 9
     function(selector,args) {
       logDebug("dispatch command: vertices");
       /*if (args.length > 0) {
@@ -640,13 +647,13 @@ var glQuery = (function() {
         for (var i = 0; i < selector.length; ++i)
           if (typeof tagCommands[selector[i]] !== 'undefined')
             delete tagCommands[selector[i]][command.vertices];
-      }* /
+      }*/
     },
-    // normals: 6
+    // normals: 10
     function(selector, args) {
       logDebug("dispatch command: normals");
     },
-    // indices: 7
+    // indices: 11
     function(selector, args) {
       logDebug("dispatch command: indices");
       /*if (args.length > 0) {
@@ -660,16 +667,16 @@ var glQuery = (function() {
         for (var i = 0; i < selector.length; ++i)
           if (typeof tagCommands[selector[i]] !== 'undefined')
             delete tagCommands[selector[i]][command.indices];
-      }* /
+      }*/
     },
-    // material: 8
+    // material: 12
     function(selector, args) {
       logDebug("dispatch command: material");
     },
-    // light: 9
+    // light: 13
     function(selector, args) {
       logDebug("dispatch command: light");
-    }*/
+    }
   ];
   assert(commandDispatch.length == command.light + 1, "Internal Error: Number of commands in commandDispatch is incorrect.");
   
@@ -861,11 +868,12 @@ var glQuery = (function() {
 
         // Normalize the scene node
         var normalizedScene = normalizeNodes(sceneDef);
-        for (key in normalizedScene) {
-          rootIds.push(key);
-          scenes[key] = normalizedScene[key];
-          // TODO: generate the paths for each tag in the normalized scene
-        }
+        if (normalizedScene != null)
+          for (key in normalizedScene) {
+            rootIds.push(key);
+            scenes[key] = normalizedScene[key];
+            // TODO: generate the paths for each tag in the normalized scene?
+          }
       }
     }
     if (rootIds.length === 0) {
@@ -875,6 +883,7 @@ var glQuery = (function() {
     }
     return gl.fn.init(rootIds);
   };
+
 
   // Load a scenejs shader
   gl.shader = function(id, code) {

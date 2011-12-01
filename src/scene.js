@@ -14,11 +14,12 @@
 
         // Normalize the scene node
         var normalizedScene = normalizeNodes(sceneDef);
-        for (key in normalizedScene) {
-          rootIds.push(key);
-          scenes[key] = normalizedScene[key];
-          // TODO: generate the paths for each tag in the normalized scene
-        }
+        if (normalizedScene != null)
+          for (key in normalizedScene) {
+            rootIds.push(key);
+            scenes[key] = normalizedScene[key];
+            // TODO: generate the paths for each tag in the normalized scene?
+          }
       }
     }
     if (rootIds.length === 0) {
@@ -28,3 +29,4 @@
     }
     return gl.fn.init(rootIds);
   };
+

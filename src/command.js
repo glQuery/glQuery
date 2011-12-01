@@ -12,7 +12,7 @@
     normals: 10,
     indices: 11,
     material: 12,
-    light: 12
+    light: 13
   },
   commandDispatch = [
     // insert: 0
@@ -84,8 +84,7 @@
     function(selector,args) {
       logDebug("dispatch command: vertexAttrib4");
     },
-
-    /*// vertices: 5
+    // vertices: 9
     function(selector,args) {
       logDebug("dispatch command: vertices");
       /*if (args.length > 0) {
@@ -99,13 +98,13 @@
         for (var i = 0; i < selector.length; ++i)
           if (typeof tagCommands[selector[i]] !== 'undefined')
             delete tagCommands[selector[i]][command.vertices];
-      }* /
+      }*/
     },
-    // normals: 6
+    // normals: 10
     function(selector, args) {
       logDebug("dispatch command: normals");
     },
-    // indices: 7
+    // indices: 11
     function(selector, args) {
       logDebug("dispatch command: indices");
       /*if (args.length > 0) {
@@ -119,16 +118,16 @@
         for (var i = 0; i < selector.length; ++i)
           if (typeof tagCommands[selector[i]] !== 'undefined')
             delete tagCommands[selector[i]][command.indices];
-      }* /
+      }*/
     },
-    // material: 8
+    // material: 12
     function(selector, args) {
       logDebug("dispatch command: material");
     },
-    // light: 9
+    // light: 13
     function(selector, args) {
       logDebug("dispatch command: light");
-    }*/
+    }
   ];
   assert(commandDispatch.length == command.light + 1, "Internal Error: Number of commands in commandDispatch is incorrect.");
   
