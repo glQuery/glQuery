@@ -35,6 +35,7 @@
     else
       return assert(args.length >= minNumber, "Expected at least " + minNumber + " arguments. Instead, got " + args.length + ".");
   },
+  assertInternal = assert,
   // The last identifer number that was generated automatically
   lastId = 0,
   // Automatically generate a new object identifier
@@ -45,7 +46,7 @@
       // Automatically generate a parent id and normalize all child nodes
       var resultNodes = [];
       resultNodes.hashes = {};
-      resultNodes.prevUpdate = true;
+      resultNodes.lastUpdate = 0;
       for (var i = 0; i < nodes.length; ++i) {
         var resultNode = normalizeNodes(nodes[i])
         if (Array.isArray(nodes)) {
