@@ -574,8 +574,7 @@ var glQuery = (function() {
     },
     // Hash the state structure returned by collectCommands
     hashState = function(commandsState) {
-      // TODO: hash shader state
-      return "";
+      return commandsState[0].join('$');
     };
 
     assertInternal(node.hashes != null && typeof node.lastUpdate !== 'undefined', "Node properties are not properly initialized.");
@@ -588,7 +587,7 @@ var glQuery = (function() {
     if (typeof commandsStack === 'undefined')
       commandsStack = [];
     if (typeof commandsState === 'undefined')
-      commandsState = [];
+      commandsState = [[]];
     for (var i = 0; i < node.length; ++i) {
       var childCommandsStack = [];
       var childCommandsState = commandsState.slice(0); // Shallow copy of the array (TODO: this will not work for all types of commands, only basic ones like shaderProgram)
