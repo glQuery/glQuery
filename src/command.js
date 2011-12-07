@@ -28,7 +28,7 @@
       logDebug("dispatch command: shaderProgram");
       if (args.length > 0) {
         for (var i = 0; i < selector.length; ++i) {
-          var commandsStruct = (typeof tagCommands[selector[i]] == 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
+          var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
           commandsStruct[command.shaderProgram] = args;
         }
       }
@@ -43,7 +43,7 @@
       logDebug("dispatch command: geometry");
       if (args.length > 0) {
         for (var i = 0; i < selector.length; ++i) {
-          var commandsStruct = (typeof tagCommands[selector[i]] == 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
+          var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
           commandsStruct[command.geometry] = args[0];
         }
       }
@@ -58,7 +58,7 @@
       logDebug("dispatch command: vertexAttribBuffer");
       if (args.length > 1) {
         for (var i = 0; i < selector.length; ++i) {
-          var commandsStruct = (typeof tagCommands[selector[i]] == 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
+          var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
           commandsStruct[command.vertexAttribute] = args;
         }
       }
@@ -89,7 +89,7 @@
       logDebug("dispatch command: vertices");
       /*if (args.length > 0) {
         for (var i = 0; i < selector.length; ++i) {
-          var commandsStruct = (typeof tagCommands[selector[i]] == 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]];
+          var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]];
           // TODO: convert argument into a buffer object first... (if it isn't already)
           commandsStruct[command.vertices] = args[0];
         }
@@ -109,7 +109,7 @@
       logDebug("dispatch command: indices");
       /*if (args.length > 0) {
         for (var i = 0; i < selector.length; ++i) {
-          var commandsStruct = (typeof tagCommands[selector[i]] == 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]];
+          var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]];
           // TODO: convert argument into a buffer object first... (if it isn't already)
           commandsStruct[command.indices] = args[0];
         }

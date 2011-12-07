@@ -43,6 +43,7 @@ var glQuery = (function() {
     else
       return assert(args.length >= minNumber, "Expected at least " + minNumber + " arguments. Instead, got " + args.length + ".");
   },
+  assertInternal = assert,
   // The last identifer number that was generated automatically
   lastId = 0,
   // Automatically generate a new object identifier
@@ -53,7 +54,7 @@ var glQuery = (function() {
       // Automatically generate a parent id and normalize all child nodes
       var resultNodes = [];
       resultNodes.hashes = {};
-      resultNodes.prevUpdate = true;
+      resultNodes.lastUpdate = 0;
       for (var i = 0; i < nodes.length; ++i) {
         var resultNode = normalizeNodes(nodes[i])
         if (Array.isArray(nodes)) {
@@ -552,8 +553,62 @@ var glQuery = (function() {
 
 
   // A module for managing (WebGL) state
-  var updateStateHashes = function(node) {
-    
+  var updateStateHashes = function(node, commandsStack, commandsState) {
+    // Collect all commands in a child node
+    var collectCommands = function(tags, commandsStack, commandsState) {
+      for (var i = 0; i < tags.length; ++i) {
+        // TODO: (Optimization) 
+        //       How fast is a lookup for an item that doesn't exist? 
+        //       Would this be worst-case performance?
+        //       Could it be faster to create separate a structure for storing tags that have no commands?
+        //       Or perhaps create empty states for these...
+        var tagCommandsState = tagCommands[tags[i]];
+        if (typeof tagCommandsState === 'undefined')
+          continue;
+        var shaderState = tagCommandsState[command.shaderProgram];
+        commandsStack.splice.apply(commandsStack, [commandsStack.length, 0].concat(tagCommandsState)); // Concatenate tagCommandsState to commandsStack (mutating the original array)
+        if (tagCommandsState != null && shaderState != null) {
+          commandsState[0] = shaderState;
+        }
+      }
+    },
+    // Hash the state structure returned by collectCommands
+    hashState = function(commandsState) {
+      // TODO: hash shader state
+      return "";
+    };
+
+    assertInternal(node.hashes != null && typeof node.lastUpdate !== 'undefined', "Node properties are not properly initialized.");
+    if (node.lastUpdate > 0) {
+      node.lastUpdate = 2;
+      return;
+    }
+    // Update hashes
+    node.hashes = {};
+    if (typeof commandsStack === 'undefined')
+      commandsStack = [];
+    if (typeof commandsState === 'undefined')
+      commandsState = [];
+    for (var i = 0; i < node.length; ++i) {
+      var childCommandsStack = [];
+      var childCommandsState = commandsState.slice(0); // Shallow copy of the array (TODO: this will not work for all types of commands, only basic ones like shaderProgram)
+      if (typeof node[i] === 'string') {
+        collectCommands(node[i].split(' '), childCommandsStack, childCommandsState);
+        var hashStack = node.hashes[hashState(childCommandsState)];
+        if (typeof hashStack === 'undefined')
+          node.hashes[hashState(childCommandsState)] = [childCommandsStack];
+        else
+          hashStack.push(childCommandsStack);
+      }
+      /* TODO:
+      else {
+        for (var key in node[i]) {
+          var childTags = tags.slice(0); // Shallow copy of the array
+          childTags.concat();
+        }
+      }*/
+    }
+    node.lastUpdate = 1;
   }
 
   var command = {
@@ -586,7 +641,7 @@ var glQuery = (function() {
       logDebug("dispatch command: shaderProgram");
       if (args.length > 0) {
         for (var i = 0; i < selector.length; ++i) {
-          var commandsStruct = (typeof tagCommands[selector[i]] == 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
+          var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
           commandsStruct[command.shaderProgram] = args;
         }
       }
@@ -601,7 +656,7 @@ var glQuery = (function() {
       logDebug("dispatch command: geometry");
       if (args.length > 0) {
         for (var i = 0; i < selector.length; ++i) {
-          var commandsStruct = (typeof tagCommands[selector[i]] == 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
+          var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
           commandsStruct[command.geometry] = args[0];
         }
       }
@@ -616,7 +671,7 @@ var glQuery = (function() {
       logDebug("dispatch command: vertexAttribBuffer");
       if (args.length > 1) {
         for (var i = 0; i < selector.length; ++i) {
-          var commandsStruct = (typeof tagCommands[selector[i]] == 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
+          var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
           commandsStruct[command.vertexAttribute] = args;
         }
       }
@@ -647,7 +702,7 @@ var glQuery = (function() {
       logDebug("dispatch command: vertices");
       /*if (args.length > 0) {
         for (var i = 0; i < selector.length; ++i) {
-          var commandsStruct = (typeof tagCommands[selector[i]] == 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]];
+          var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]];
           // TODO: convert argument into a buffer object first... (if it isn't already)
           commandsStruct[command.vertices] = args[0];
         }
@@ -667,7 +722,7 @@ var glQuery = (function() {
       logDebug("dispatch command: indices");
       /*if (args.length > 0) {
         for (var i = 0; i < selector.length; ++i) {
-          var commandsStruct = (typeof tagCommands[selector[i]] == 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]];
+          var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]];
           // TODO: convert argument into a buffer object first... (if it isn't already)
           commandsStruct[command.indices] = args[0];
         }
@@ -763,6 +818,7 @@ var glQuery = (function() {
     }
   };
 
+  // Create a dummy API which behaves like a stand-in builder object when the selector fails
   var apiDummy = {};
   for (var key in gl.fn) {
     apiDummy[key] = function() { return this; };
