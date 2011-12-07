@@ -75,9 +75,16 @@
           if (key === 'prototype') {
             logError("The given nodes contain a 'prototype' object. ");
             continue;
-          } 
+          }
           var node = normalizeNodes(nodes[key]);
-          result[key] = (Array.isArray(node)? node : (node != null? [node] : []));
+          if (Array.isArray(node))
+            result[key] = node;
+          else {
+            var n = (node != null? [node] : []);
+            n.hashes = {};
+            n.lastUpdate = 0;
+            result[key] = n;
+          }
         }
         return result;
     }
