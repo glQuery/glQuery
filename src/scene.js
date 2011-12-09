@@ -45,7 +45,7 @@
     // TODO
     // Update the state hashes for each of the root ids
     for (var i = 0; i < rootIds.length; ++i) {
-      updateStateHashes(scenes[rootIds]);
+      updateSceneHashes(rootIds[i]);
     }
     return gl.fn.init(rootIds);
   };
