@@ -47,6 +47,6 @@
     for (var i = 0; i < rootIds.length; ++i) {
       updateSceneHashes(rootIds[i]);
     }
-    return gl.fn.init(rootIds);
+    return gl.fn.init.apply(gl.fn, rootIds);
   };
 
