@@ -73,9 +73,18 @@ var glQuery = (function() {
     }
     switch (typeof nodes) {
       case 'string':
+        // Make sure tags have a commands stack associated (so that hashes do not need to be rebuilt when non-hashed commands are added to empty tags)
+        var tags = nodes.split(' ');
+        for (var i = 0; i < tags.length; ++i)
+          if (typeof tagCommands[tags[i]] === 'undefined')
+            tagCommands[tags[i]] = [];
         return nodes;
       case 'number':
-        return String(nodes);
+        var str = String(nodes);
+        // Make sure tags have a commands stack associated (so that hashes do not need to be rebuilt when non-hashed commands are added to empty tags)
+        if (typeof tagCommands[str] === 'undefined')
+          tagCommands[str] = [];
+        return str;
       case 'object':
         var result = {};
         // TODO: normalize key-value pairs
