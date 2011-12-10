@@ -6,18 +6,19 @@
       var sceneDef = arguments[i];
       if (Array.isArray(sceneDef)) {
         // Don't nest arrays, generate a new id for the node instead
-        var id = generateId();
+        var id = normalizeNodes(generateId());
         scenes[id] = normalizeNodes(sceneDef);
         rootIds.push(id);
         continue;
       }
       switch (typeof sceneDef) {
         case 'string':
-          scenes[sceneDef] = [];
-          rootIds.push(sceneDef);
+          var id = normalizeNodes(sceneDef);
+          scenes[id] = [];
+          rootIds.push(id);
           continue;
         case 'number':
-          var id = String(sceneDef);
+          var id = normalizeNodes(String(sceneDef));
           scenes[id] = [];
           rootIds.push(id);
           continue;

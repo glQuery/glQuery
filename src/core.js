@@ -86,6 +86,7 @@
             logError("The given nodes contain a 'prototype' object. ");
             continue;
           }
+          normalizeNodes(key);
           var node = normalizeNodes(nodes[key]);
           if (Array.isArray(node))
             result[key] = node;

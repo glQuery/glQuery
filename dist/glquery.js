@@ -94,6 +94,7 @@ var glQuery = (function() {
             logError("The given nodes contain a 'prototype' object. ");
             continue;
           }
+          normalizeNodes(key);
           var node = normalizeNodes(nodes[key]);
           if (Array.isArray(node))
             result[key] = node;
@@ -793,7 +794,7 @@ var glQuery = (function() {
       commandArgs = c[2];
       commandDispatch[key](selector, commandArgs);
     }
-  }; 
+  };
     
   // Append a command to the quey
   gl.command = function() {
@@ -970,18 +971,19 @@ var glQuery = (function() {
       var sceneDef = arguments[i];
       if (Array.isArray(sceneDef)) {
         // Don't nest arrays, generate a new id for the node instead
-        var id = generateId();
+        var id = normalizeNodes(generateId());
         scenes[id] = normalizeNodes(sceneDef);
         rootIds.push(id);
         continue;
       }
       switch (typeof sceneDef) {
         case 'string':
-          scenes[sceneDef] = [];
-          rootIds.push(sceneDef);
+          var id = normalizeNodes(sceneDef);
+          scenes[id] = [];
+          rootIds.push(id);
           continue;
         case 'number':
-          var id = String(sceneDef);
+          var id = normalizeNodes(String(sceneDef));
           scenes[id] = [];
           rootIds.push(id);
           continue;
