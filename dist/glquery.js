@@ -607,7 +607,7 @@ var glQuery = (function() {
       if (typeof node[i] === 'string') {
         // Collect commands
         var childCommandsStack = [];
-        var childCommandsState = commandsState.slice(0); // Shallow copy of the state (TODO: this will not work for all types of commands, only basic ones like shaderProgram)
+        var childCommandsState = commandsState.slice(); // Shallow copy of the state (TODO: this will not work for all types of commands, only basic ones like shaderProgram)
         collectCommands(node[i].split(' '), childCommandsStack, childCommandsState);
         // Store commands in the corresponding state hash
         var stateHash = hashState(childCommandsState);
@@ -620,7 +620,7 @@ var glQuery = (function() {
         for (var key in node[i]) {
           // Collect commands
           var childCommandsStack = [];
-          var childCommandsState = commandsState.slice(0); // Shallow copy of the state (TODO: this will not work for all types of commands, only basic ones like shaderProgram)
+          var childCommandsState = commandsState.slice(); // Shallow copy of the state (TODO: this will not work for all types of commands, only basic ones like shaderProgram)
           collectCommands(node[i].split(' '), childCommandsStack, childCommandsState);
           // Update the state hashes for the children
           var childNode = node[i][key];
@@ -793,7 +793,7 @@ var glQuery = (function() {
     // TODO: consider what should be done if the command is 'insert' or 'remove'
     if (!assertNumberOfArguments(arguments, 1, 'command')) return gl;
     if (!assert(command[arguments[0]] != null, "Unknown command '" + command[arguments[0]] + "' used.")) return gl;
-    commands.push(command[arguments[0]], (command[arguments[1]] != null? command[arguments[1]] : null), Array.prototype.slice.call(arguments, 2));
+    commands.push([command[arguments[0]], (command[arguments[1]] != null? command[arguments[1]] : null), Array.prototype.slice.call(arguments, 2)]);
     return gl;
   };
 
@@ -817,42 +817,42 @@ var glQuery = (function() {
       // TODO: consider what should be done if the command is 'insert' or 'remove'
       if (!assertNumberOfArguments(arguments, 1, 'command')) return this;
       if (!assert(command[arguments[0]] != null, "Unknown command '" + command[arguments[0]] + "' used.")) return this;
-      commands.push(command[arguments[0]], this._selector, Array.prototype.slice.call(arguments, 1));
+      commands.push([command[arguments[0]], this._selector, Array.prototype.slice.call(arguments, 1)]);
       return this;
     },
     shaderProgram: function() {
       logDebug("shaderProgram");
-      commands.push(command.shaderProgram, this._selector, Array.prototype.slice.call(arguments));
+      commands.push([command.shaderProgram, this._selector, Array.prototype.slice.call(arguments)]);
       return this;
     },
     triangles: function() {
       logDebug("triangles");
-      commands.push(command.geometry, this._selector, [gl.TRIANGLES]);
+      commands.push([command.geometry, this._selector, [gl.TRIANGLES]]);
       return this;
     },
     vertexAttrib: function() {
       logDebug("vertexAttrib");
-      commands.push(command.vertexAttribBuffer, this._selector, Array.prototype.slice.call(arguments));
+      commands.push([command.vertexAttribBuffer, this._selector, Array.prototype.slice.call(arguments)]);
       return this;
     },
     indices: function() {
       logDebug("indices");
-      commands.push(command.indices, this._selector, Array.prototype.slice.call(arguments));
+      commands.push([command.indices, this._selector, Array.prototype.slice.call(arguments)]);
       return this;
     },
     vertices: function() {
       logDebug("vertices");
-      commands.push(command.vertices, this._selector, Array.prototype.slice.call(arguments));
+      commands.push([command.vertices, this._selector, Array.prototype.slice.call(arguments)]);
       return this;
     },
     material: function() {
       logDebug("material");
-      commands.push(command.material, this._selector, Array.prototype.slice.call(arguments));
+      commands.push([command.material, this._selector, Array.prototype.slice.call(arguments)]);
       return this;
     },
     light: function() {
       logDebug("light");
-      commands.push(command.light, this._selector, Array.prototype.slice.call(arguments));
+      commands.push([command.light, this._selector, Array.prototype.slice.call(arguments)]);
       return this;
     }
   };

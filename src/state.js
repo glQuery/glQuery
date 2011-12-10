@@ -37,7 +37,7 @@
       if (typeof node[i] === 'string') {
         // Collect commands
         var childCommandsStack = [];
-        var childCommandsState = commandsState.slice(0); // Shallow copy of the state (TODO: this will not work for all types of commands, only basic ones like shaderProgram)
+        var childCommandsState = commandsState.slice(); // Shallow copy of the state (TODO: this will not work for all types of commands, only basic ones like shaderProgram)
         collectCommands(node[i].split(' '), childCommandsStack, childCommandsState);
         // Store commands in the corresponding state hash
         var stateHash = hashState(childCommandsState);
@@ -50,7 +50,7 @@
         for (var key in node[i]) {
           // Collect commands
           var childCommandsStack = [];
-          var childCommandsState = commandsState.slice(0); // Shallow copy of the state (TODO: this will not work for all types of commands, only basic ones like shaderProgram)
+          var childCommandsState = commandsState.slice(); // Shallow copy of the state (TODO: this will not work for all types of commands, only basic ones like shaderProgram)
           collectCommands(node[i].split(' '), childCommandsStack, childCommandsState);
           // Update the state hashes for the children
           var childNode = node[i][key];
