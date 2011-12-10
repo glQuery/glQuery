@@ -13,6 +13,7 @@ var glQuery = (function() {
   // The scenes, each of which contains a hierarchy of identifiers
   scenes = {},
   // Commands to be executed
+  // TODO: Should commands be associated with a specific scene id?
   commands = [],
   // Commands associated with a tag
   tagCommands = {},
@@ -783,12 +784,18 @@ var glQuery = (function() {
   ];
   assert(commandDispatch.length == command.light + 1, "Internal Error: Number of commands in commandDispatch is incorrect.");
   
-  // Execute a command taken from the queue
-  var dispatchCommand = function(key, selector, commandArgs) {
-    commandDispatch[key](selector, commandArgs);
-  };
+  // Executes all commands in the queue
+  var dispatchCommands = function(commands) {
+    for (var i = 0; i < commands.length; ++i) {
+      var c = commands[i],
+      key = c[0],
+      selector = c[1],
+      commandArgs = c[2];
+      commandDispatch[key](selector, commandArgs);
+    }
+  }; 
     
-  // Append a command to the stream
+  // Append a command to the quey
   gl.command = function() {
     // TODO: consider what should be done if the command is 'insert' or 'remove'
     if (!assertNumberOfArguments(arguments, 1, 'command')) return gl;
@@ -811,6 +818,12 @@ var glQuery = (function() {
       //logDebug("render");
       if (!assertType(context, 'object', 'render', 'context')) return this;
       // TODO: assert that the context is a webgl context specifically     
+      // Dispatch all commands waiting in the queue
+      dispatchCommands(commands);
+      // TODO: Dispatch the webgl methods for this selector
+      // Execute the webgl commands associated with this selector
+      // TODO: Do we need to flush the webgl commands? (Perhaps later when rendering to textures for example)
+      //context.flush();
       return this;
     },
     command: function() {

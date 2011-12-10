@@ -5,6 +5,7 @@
   // The scenes, each of which contains a hierarchy of identifiers
   scenes = {},
   // Commands to be executed
+  // TODO: Should commands be associated with a specific scene id?
   commands = [],
   // Commands associated with a tag
   tagCommands = {},
