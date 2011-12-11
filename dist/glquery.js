@@ -577,7 +577,8 @@ var glQuery = (function() {
   var containsAnyTags = function(t0, ts1) {
     // TODO: This function can probably be optimized quite a bit (possibly 
     //       by converting ts1 into a regular expression instead)
-    ts0 = t0.split(' ');
+    // See also http://ejohn.org/blog/revised-javascript-dictionary-search/
+    var ts0 = t0.split(' ');
     for (var i = 0; i < ts0.length; ++i) {
       if (ts0[i] === '') continue;
       for (var j = 0; j < ts1.length; ++j) {
@@ -847,7 +848,7 @@ var glQuery = (function() {
   ];
   assert(commandDispatch.length == command.light + 1, "Internal Error: Number of commands in commandDispatch is incorrect.");
   
-  // Executes all commands in the queue
+  // Dispatches all commands in the queue
   var dispatchCommands = function(commands) {
     for (var i = 0; i < commands.length; ++i) {
       var c = commands[i],
@@ -855,6 +856,12 @@ var glQuery = (function() {
       selector = c[1],
       commandArgs = c[2];
       commandDispatch[key](selector, commandArgs);
+    }
+  },
+  // Marshall and execute commands after updating the render state
+  evalCommands = function(renderState, commands) {
+    for (var i = 0; i < commands.length; ++i) {
+      // TODO: ... busy here
     }
   };
     
@@ -880,13 +887,45 @@ var glQuery = (function() {
     render: function(context) {
       //logDebug("render");
       if (!assertType(context, 'object', 'render', 'context')) return this;
-      // TODO: assert that the context is a WebGL context specifically     
+      // TODO: assert that the context is a WebGL context specifically
       // Dispatch all commands waiting in the queue
       dispatchCommands(commands);
       // Update the state hashes for sorting commands
-      // TODO: BUSY...
+      // (It could theoretically be faster to update only the scenes that are needed for the selector)
+      if (dirtyTags.length > 0) {
+        updateDirtyHashes(dirtyTags);
+        for (var key in scenes)
+          updateSceneHashes(scenes[key]);
+        dirtyTags.length = 0;
+      }
       // Execute the WebGL commands associated with this selector
-      // TODO: BUSY...
+      var renderSubTree = function(renderState, node) {
+        for (var i = 0; i < node.length; ++i) {
+          var n = node[i];
+          for (var key in n.hashes) {
+            evalCommands(renderState, n.hashes[key]);
+          }
+        }
+      }
+      var renderTraverse = function(renderState, node, selector) {
+        for (var i = 0; i < node.length; ++i) {
+          var n = node[i];
+          if (typeof n !== 'string') {
+            for (var key in n)
+              if (containsAnyTags(key, this._selector))
+                renderSubTree(renderState, n[key]);
+              else
+                renderTraverse(renderState, n[key], this._selector);
+          }
+        }
+      };
+      for (var key in scenes) {
+        var renderState = [];
+        if (containsAnyTags(key, this._selector))
+          renderSubTree(renderState, scenes[key]);
+        else
+          renderTraverse(renderState, scenes[key], this._selector);
+      }
       // Flush WebGL commands
       // TODO: Do we need to flush the WebGL commands? (Perhaps later when rendering to textures for example)
       //context.flush();

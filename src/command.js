@@ -131,7 +131,7 @@
   ];
   assert(commandDispatch.length == command.light + 1, "Internal Error: Number of commands in commandDispatch is incorrect.");
   
-  // Executes all commands in the queue
+  // Dispatches all commands in the queue
   var dispatchCommands = function(commands) {
     for (var i = 0; i < commands.length; ++i) {
       var c = commands[i],
@@ -139,6 +139,12 @@
       selector = c[1],
       commandArgs = c[2];
       commandDispatch[key](selector, commandArgs);
+    }
+  },
+  // Marshall and execute commands after updating the render state
+  evalCommands = function(renderState, commands) {
+    for (var i = 0; i < commands.length; ++i) {
+      // TODO: ... busy here
     }
   };
     
