@@ -17,6 +17,8 @@ var glQuery = (function() {
   commands = [],
   // Commands associated with a tag
   tagCommands = {},
+  // Tags for which commands have been dispatched that affect the state hashes
+  dirtyTags = [],
   // All shader definitions
   shaders = {},
   // Logging / information methods
@@ -570,6 +572,22 @@ var glQuery = (function() {
   gl.BROWSER_DEFAULT_WEBGL          = 0x9244;
 
 
+  // Utility functions for working with tags
+  // Test whether t0 contains any of the tags in ts1
+  var containsAnyTags = function(t0, ts1) {
+    // TODO: This function can probably be optimized quite a bit (possibly 
+    //       by converting ts1 into a regular expression instead)
+    ts0 = t0.split(' ');
+    for (var i = 0; i < ts0.length; ++i) {
+      if (ts0[i] === '') continue;
+      for (var j = 0; j < ts1.length; ++j) {
+        if (ts0[i] === ts1[j])
+          return true;
+      }
+    }
+    return false;
+  };
+
   // A module for managing (WebGL) state
   var collectCommands = function(tags, commandsStack, commandsState) {
     for (var i = 0; i < tags.length; ++i) {
@@ -589,14 +607,41 @@ var glQuery = (function() {
     }
   },
   updateStateHashes = function(node, commandsStack, commandsState) {
+    // Meaning of the lastUpdate flag:
+    // -1  Update this node and all its children (happens when a key in
+    //     {key: [...]} changes before some time before this node is updated)
+    // 0   Update this node and possibly (but not necessarily) some of its
+    //     children (happens when a tag in a leaf node changes, i.e. a tag in a
+    //     string value, or when one of the child nodes changes)
+    // 1   This node has just been updated
+    // 2   This node was up to date before updateStateHashes was called
+
     // Hash the state structure returned by collectCommands
     var hashState = function(commandsState) {
       return commandsState[0].join('$');
     };
-
     assertInternal(node.hashes != null && typeof node.lastUpdate !== 'undefined', "Node properties are not properly initialized.");
+    // Test whether this node needs to be updated
     if (node.lastUpdate > 0) {
-      node.lastUpdate = 2;
+      // Test if any of the child nodes need to be updated
+      var dirtyHash = false;
+      for (var i = 0; i < node.length; ++i)
+        if (typeof node[i] !== 'string')
+          for (var key in node[i]) {
+            var childNode = node[i][key];
+            if (Array.isArray(childNode)) {
+              updateStateHashes(childNode);
+              dirtyHash |= childNode.lastUpdate == 1;
+            }
+          } 
+      // Collect the hashes if any of the children's hashes changed
+      if (dirtyHash) {
+        // TODO: Busy here... Update the node.hashes with children's hashes
+        //....
+        node.lastUpdate = 1;
+      }
+      else
+        node.lastUpdate = 2;
       return;
     }
     // Update hashes
@@ -626,6 +671,8 @@ var glQuery = (function() {
           collectCommands(node[i].split(' '), childCommandsStack, childCommandsState);
           // Update the state hashes for the children
           var childNode = node[i][key];
+          if (node.lastUpdate === -1)
+            childNode.lastUpdate = -1;
           childCommandsStack = commandsStack.concat(childCommandsStack);
           updateStateHashes(childNode, childCommandsStack, childCommandsState);
           // Merge the child node's hashes with this node's hashes
@@ -650,6 +697,39 @@ var glQuery = (function() {
     collectCommands(id.split(' '), commandsStack, commandsState);
     // Update the state hashes
     updateStateHashes(scenes[id], commandsStack, commandsState);
+  },
+  updateDirtyHashes = function(dirtyTags) {
+    var update = function(dirtyTags, key, node) {
+      if (containsAnyTags(key, dirtyTags)) {
+        node.lastUpdate = -1;
+        // No need to update the children too because they'll automatically be updated
+      }
+      else {
+        // Look for dirty tags in the children 
+        for (var i = 0; i < node.length; ++i) {
+          var n = node[i];
+          if (typeof n === 'string') {
+            if (node.lastUpdate < 1)
+              continue; // We already know this node must be updated
+            if (containsAnyTags(n, dirtyTags))
+              // This node should be updated regardless of whether any children 
+              // need to be updated
+              node.lastUpdate = 0;
+          }
+          else
+            for (var key in n) {
+              var n = n[key];
+              update(dirtyTags, key, n);
+              if (n.lastUpdate < 1) {
+                node.lastUpdate = 0;
+              }
+            }
+        }
+      }
+    };
+    for (var key in scenes) {
+      update(dirtyTags, key, scenes[key]);
+    }
   };
 
   var command = {
@@ -818,12 +898,15 @@ var glQuery = (function() {
     render: function(context) {
       //logDebug("render");
       if (!assertType(context, 'object', 'render', 'context')) return this;
-      // TODO: assert that the context is a webgl context specifically     
+      // TODO: assert that the context is a WebGL context specifically     
       // Dispatch all commands waiting in the queue
       dispatchCommands(commands);
-      // TODO: Dispatch the webgl methods for this selector
-      // Execute the webgl commands associated with this selector
-      // TODO: Do we need to flush the webgl commands? (Perhaps later when rendering to textures for example)
+      // Update the state hashes for sorting commands
+      // TODO: BUSY...
+      // Execute the WebGL commands associated with this selector
+      // TODO: BUSY...
+      // Flush WebGL commands
+      // TODO: Do we need to flush the WebGL commands? (Perhaps later when rendering to textures for example)
       //context.flush();
       return this;
     },
@@ -878,7 +961,7 @@ var glQuery = (function() {
   };
 
 
-  // Initialize a webgl canvas
+  // Initialize a WebGL canvas
   gl.canvas = function(htmlCanvas, contextAttr, width, height) {
     var canvasId, canvasEl;
     logDebug("canvas");

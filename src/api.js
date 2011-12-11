@@ -10,12 +10,15 @@
     render: function(context) {
       //logDebug("render");
       if (!assertType(context, 'object', 'render', 'context')) return this;
-      // TODO: assert that the context is a webgl context specifically     
+      // TODO: assert that the context is a WebGL context specifically     
       // Dispatch all commands waiting in the queue
       dispatchCommands(commands);
-      // TODO: Dispatch the webgl methods for this selector
-      // Execute the webgl commands associated with this selector
-      // TODO: Do we need to flush the webgl commands? (Perhaps later when rendering to textures for example)
+      // Update the state hashes for sorting commands
+      // TODO: BUSY...
+      // Execute the WebGL commands associated with this selector
+      // TODO: BUSY...
+      // Flush WebGL commands
+      // TODO: Do we need to flush the WebGL commands? (Perhaps later when rendering to textures for example)
       //context.flush();
       return this;
     },

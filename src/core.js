@@ -9,6 +9,8 @@
   commands = [],
   // Commands associated with a tag
   tagCommands = {},
+  // Tags for which commands have been dispatched that affect the state hashes
+  dirtyTags = [],
   // All shader definitions
   shaders = {},
   // Logging / information methods

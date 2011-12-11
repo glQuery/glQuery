@@ -1,4 +1,4 @@
-  // Initialize a webgl canvas
+  // Initialize a WebGL canvas
   gl.canvas = function(htmlCanvas, contextAttr, width, height) {
     var canvasId, canvasEl;
     logDebug("canvas");
