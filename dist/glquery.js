@@ -621,27 +621,9 @@ var glQuery = (function() {
       return commandsState[0].join('$');
     };
     assertInternal(node.hashes != null && typeof node.lastUpdate !== 'undefined', "Node properties are not properly initialized.");
-    // Test whether this node needs to be updated
+    // Test whether this node or any of its children needs to be updated
     if (node.lastUpdate > 0) {
-      // Test if any of the child nodes need to be updated
-      var dirtyHash = false;
-      for (var i = 0; i < node.length; ++i)
-        if (typeof node[i] !== 'string')
-          for (var key in node[i]) {
-            var childNode = node[i][key];
-            if (Array.isArray(childNode)) {
-              updateStateHashes(childNode);
-              dirtyHash |= childNode.lastUpdate == 1;
-            }
-          } 
-      // Collect the hashes if any of the children's hashes changed
-      if (dirtyHash) {
-        // TODO: Busy here... Update the node.hashes with children's hashes
-        //....
-        node.lastUpdate = 1;
-      }
-      else
-        node.lastUpdate = 2;
+      node.lastUpdate = 2;
       return;
     }
     // Update hashes
