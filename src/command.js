@@ -1,29 +1,24 @@
   var command = {
-    insert: 0,
-    remove: 1,
-    shaderProgram: 2,
-    geometry: 3,
-    vertexAttribBuffer: 4,
-    vertexAttrib1: 5,
-    vertexAttrib2: 6,
-    vertexAttrib3: 7,
-    vertexAttrib4: 8,
-    vertices: 9,
-    normals: 10,
-    indices: 11,
-    material: 12,
-    light: 13
+    // Hashed state (These commands are sorted by a hash function)
+    shaderProgram: 0,
+    // Unhashed state (These commands can be updated without resorting)
+    geometry: 1,
+    vertexAttribBuffer: 2,
+    vertexAttrib1: 3,
+    vertexAttrib2: 4,
+    vertexAttrib3: 5,
+    vertexAttrib4: 6,
+    vertices: 7,
+    normals: 8,
+    indices: 9,
+    material: 10,
+    light: 11,
+    // Scene graph
+    insert: 12,
+    remove: 13
   },
   commandDispatch = [
-    // insert: 0
-    function(selector, args) {
-      logDebug("dispatch command: insert");
-    },
-    // remove: 1
-    function(selector, args) {
-      logDebug("dispatch command: remove");
-    },
-    // shaderProgram: 2
+    // shaderProgram: 0
     function(selector, args) {
       logDebug("dispatch command: shaderProgram");
       if (args.length > 0) {
@@ -38,7 +33,7 @@
             delete tagCommands[selector[i]][command.shaderProgram];
       }
     },
-    // geometry: 3
+    // geometry: 1
     function(selector, args) {
       logDebug("dispatch command: geometry");
       if (args.length > 0) {
@@ -53,7 +48,7 @@
             delete tagCommands[selector[i]][command.geometry];
       }
     },
-    // vertexAttribBuffer: 4
+    // vertexAttribBuffer: 2
     function(selector,args) {
       logDebug("dispatch command: vertexAttribBuffer");
       if (args.length > 1) {
@@ -68,23 +63,23 @@
             delete tagCommands[selector[i]][command.vertexAttribute];
       }
     },
-    // vertexAttrib1: 5
+    // vertexAttrib1: 3
     function(selector,args) {
       logDebug("dispatch command: vertexAttrib1");
     },
-    // vertexAttrib2: 6
+    // vertexAttrib2: 4
     function(selector,args) {
       logDebug("dispatch command: vertexAttrib2");
     },
-    // vertexAttrib3: 7
+    // vertexAttrib3: 5
     function(selector,args) {
       logDebug("dispatch command: vertexAttrib3");
     },
-    // vertexAttrib4: 8
+    // vertexAttrib4: 6
     function(selector,args) {
       logDebug("dispatch command: vertexAttrib4");
     },
-    // vertices: 9
+    // vertices: 7
     function(selector,args) {
       logDebug("dispatch command: vertices");
       /*if (args.length > 0) {
@@ -100,11 +95,11 @@
             delete tagCommands[selector[i]][command.vertices];
       }*/
     },
-    // normals: 10
+    // normals: 8
     function(selector, args) {
       logDebug("dispatch command: normals");
     },
-    // indices: 11
+    // indices: 9
     function(selector, args) {
       logDebug("dispatch command: indices");
       /*if (args.length > 0) {
@@ -120,16 +115,24 @@
             delete tagCommands[selector[i]][command.indices];
       }*/
     },
-    // material: 12
+    // material: 10
     function(selector, args) {
       logDebug("dispatch command: material");
     },
-    // light: 13
+    // light: 11
     function(selector, args) {
       logDebug("dispatch command: light");
+    },
+    // insert: 12
+    function(selector, args) {
+      logDebug("dispatch command: insert");
+    },
+    // remove: 13
+    function(selector, args) {
+      logDebug("dispatch command: remove");
     }
   ];
-  assert(commandDispatch.length == command.light + 1, "Internal Error: Number of commands in commandDispatch is incorrect.");
+  assert(commandDispatch.length == command.length, "Internal Error: Number of commands in commandDispatch is incorrect.");
   
   // Dispatches all commands in the queue
   var dispatchCommands = function(commands) {
@@ -141,10 +144,16 @@
       commandDispatch[key](selector, commandArgs);
     }
   },
-  // Marshall and execute commands after updating the render state
+  // Collect and execute webgl commands using a render state structure to keep track of state changes
   evalCommands = function(renderState, commands) {
     for (var i = 0; i < commands.length; ++i) {
+      var c = commands[i];
+
+      // Structure:
+      // c[0] = command id
+      
       // TODO: ... busy here
+      //if (renderState[c[0]])
     }
   };
     

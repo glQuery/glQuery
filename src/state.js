@@ -12,7 +12,7 @@
       commandsStack.splice.apply(commandsStack, [commandsStack.length, 0].concat(tagCommandsState)); // Concatenate tagCommandsState to commandsStack (mutating the original array)
       var shaderState = tagCommandsState[command.shaderProgram];
       if (shaderState != null) {
-        commandsState[0] = shaderState;
+        commandsState[command.shaderProgram] = shaderState;
       }
     }
   },
@@ -28,7 +28,7 @@
 
     // Hash the state structure returned by collectCommands
     var hashState = function(commandsState) {
-      return commandsState[0].join('$');
+      return commandsState[command.shaderProgram].join('$');
     };
     assertInternal(node.hashes != null && typeof node.lastUpdate !== 'undefined', "Node properties are not properly initialized.");
     // Test whether this node or any of its children needs to be updated
