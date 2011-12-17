@@ -143,51 +143,55 @@
   ],
   commandEval = [
     // shaderProgram: 0
-    function(args) {
+    function(context, renderState, args) {
       logDebug("eval command: shaderProgram");
     },
     // geometry: 1
-    function(args) {
+    function(context, renderState, args) {
       logDebug("eval command: geometry");
+      context.drawArrays(args, 0, 3);
     },
     // vertices: 2
-    function(args) {
+    function(context, renderState, args) {
       logDebug("eval command: vertices");
     },
     // normals: 3
-    function(args) {
+    function(context, renderState, args) {
       logDebug("eval command: normals");
     },
     // indices: 4
-    function(args) {
+    function(context, renderState, args) {
       logDebug("eval command: indices");
     },
     // material: 5
-    function(args) {
+    function(context, renderState, args) {
       logDebug("eval command: material");
     },
     // light: 6
-    function(args) {
+    function(context, renderState, args) {
       logDebug("eval command: light");
     },
     // vertexAttribBuffer: 7
-    function(args) {
+    function(context, renderState, args) {
       logDebug("eval command: vertexAttribBuffer");
+      context.bindBuffer(context.ARRAY_BUFFER, args[0]);
+      context.vertexAttribPointer(args[1], args[2], args[3], args[4], args[5], args[6]);
+      renderState.numVertices = args[2];
     },
     // vertexAttrib1: 8
-    function(args) {
+    function(context, renderState, args) {
       logDebug("eval command: vertexAttrib1");
     },
     // vertexAttrib2: 9
-    function(args) {
+    function(context, renderState, args) {
       logDebug("eval command: vertexAttrib2");
     },
     // vertexAttrib3: 10
-    function(args) {
+    function(context, renderState, args) {
       logDebug("eval command: vertexAttrib3");
     },
     // vertexAttrib4: 11
-    function(args) {
+    function(context, renderState, args) {
       logDebug("eval command: vertexAttrib4");
     }
   ];
@@ -207,7 +211,7 @@
     }
   },
   // Collect and execute webgl commands using a render state structure to keep track of state changes
-  evalCommands = function(renderState, commandsStack) {
+  evalCommands = function(context, renderState, commandsStack) {
     logDebug("evalCommands");
     
     //var newRenderState = new Array(commandEval.length);
@@ -228,15 +232,20 @@
     // Do WebGL API calls
 
     // Shader program
-    if (newRenderState[command.shaderProgram] != renderState[command.shaderProgram])
-      commandEval[command.shaderProgram](newRenderState[command.shaderProgram]);
+    var shaderProgramCommand = newRenderState[command.shaderProgram];
+    if (shaderProgramCommand != renderState[command.shaderProgram]) {
+      commandEval[command.shaderProgram](context, newRenderState, shaderProgramCommand);
+    }
     // Shader state
-    for (var i = command.vertexAttribBuffer; i <= command.vertexAttrib4; ++i)
-      if (newRenderState[i] != null && newRenderState[i] !== renderState[i])
-        commandEval[i](newRenderState[i]);
+    for (var i = command.vertexAttribBuffer; i <= command.vertexAttrib4; ++i) {
+      var stateCommand = newRenderState[i];
+      if (stateCommand != null && stateCommand !== renderState[i])
+        commandEval[i](context, newRenderState, stateCommand);
+    }
     // Draw geometry
-    if (newRenderState[command.geometry] != null)
-      commandEval[command.geometry](newRenderState[command.geometry]);
+    var geometryCommand = newRenderState[command.geometry];
+    if (geometryCommand != null)
+      commandEval[command.geometry](context, newRenderState, geometryCommand);
 
     // Update current render state
     renderState = newRenderState;
