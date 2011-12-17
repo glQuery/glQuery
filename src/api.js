@@ -26,13 +26,13 @@
         for (var key in node.hashes) {
           var objectCommandStacks = node.hashes[key];
           for (var i = 0; i < objectCommandStacks.length; ++i)
-            evalCommands(renderState, objectCommandStacks[i]); 
+            evalCommands(context, renderState, objectCommandStacks[i]); 
         }
         /*for (var i = 0; i < node.length; ++i) {
           var n = node[i];
           if (typeof n !== 'string') {
             for (var key in n.hashes) {
-              evalCommands(renderState, n.hashes[key]);
+              evalCommands(context, renderState, n.hashes[key]);
             }
           }
         }*/
