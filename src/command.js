@@ -30,7 +30,8 @@
       logDebug("dispatch command: shaderProgram");
       if (args.length > 0) {
         for (var i = 0; i < selector.length; ++i) {
-          var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
+          //var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
+          var commandsStruct = tagCommands[selector[i]];
           commandsStruct[command.shaderProgram] = args;
         }
       }
@@ -45,7 +46,8 @@
       logDebug("dispatch command: geometry");
       if (args.length > 0) {
         for (var i = 0; i < selector.length; ++i) {
-          var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
+          //var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
+          var commandsStruct = tagCommands[selector[i]];
           commandsStruct[command.geometry] = args[0];
         }
       }
@@ -100,7 +102,7 @@
       logDebug("dispatch command: light");
     },
     // vertexAttribBuffer: 7
-    function(selector,args) {
+    function(selector, args) {
       logDebug("dispatch command: vertexAttribBuffer");
       if (args.length > 1) {
         for (var i = 0; i < selector.length; ++i) {
@@ -115,19 +117,19 @@
       }
     },
     // vertexAttrib1: 8
-    function(selector,args) {
+    function(selector, args) {
       logDebug("dispatch command: vertexAttrib1");
     },
     // vertexAttrib2: 9
-    function(selector,args) {
+    function(selector, args) {
       logDebug("dispatch command: vertexAttrib2");
     },
     // vertexAttrib3: 10
-    function(selector,args) {
+    function(selector, args) {
       logDebug("dispatch command: vertexAttrib3");
     },
     // vertexAttrib4: 11
-    function(selector,args) {
+    function(selector, args) {
       logDebug("dispatch command: vertexAttrib4");
     },
     // insert: 12
@@ -138,9 +140,61 @@
     function(selector, args) {
       logDebug("dispatch command: remove");
     }
+  ],
+  commandEval = [
+    // shaderProgram: 0
+    function(args) {
+      logDebug("eval command: shaderProgram");
+    },
+    // geometry: 1
+    function(args) {
+      logDebug("eval command: geometry");
+    },
+    // vertices: 2
+    function(args) {
+      logDebug("eval command: vertices");
+    },
+    // normals: 3
+    function(args) {
+      logDebug("eval command: normals");
+    },
+    // indices: 4
+    function(args) {
+      logDebug("eval command: indices");
+    },
+    // material: 5
+    function(args) {
+      logDebug("eval command: material");
+    },
+    // light: 6
+    function(args) {
+      logDebug("eval command: light");
+    },
+    // vertexAttribBuffer: 7
+    function(args) {
+      logDebug("eval command: vertexAttribBuffer");
+    },
+    // vertexAttrib1: 8
+    function(args) {
+      logDebug("eval command: vertexAttrib1");
+    },
+    // vertexAttrib2: 9
+    function(args) {
+      logDebug("eval command: vertexAttrib2");
+    },
+    // vertexAttrib3: 10
+    function(args) {
+      logDebug("eval command: vertexAttrib3");
+    },
+    // vertexAttrib4: 11
+    function(args) {
+      logDebug("eval command: vertexAttrib4");
+    }
   ];
+
   //assert(commandDispatch.length === command.length, "Internal Error: Number of commands in commandDispatch is incorrect.");
   assert(commandDispatch.length === commandsSize.hashedState + commandsSize.unhashedState + commandsSize.unhashedStateDictionary + commandsSize.sceneGraph, "Internal Error: Total commands size does not add up to the correct number.");
+  assert(commandEval.length === commandDispatch.length - commandsSize.sceneGraph, "Internal Error: Number of commands in commandEval is incorrect.");
   
   // Dispatches all commands in the queue
   var dispatchCommands = function(commands) {
@@ -153,16 +207,39 @@
     }
   },
   // Collect and execute webgl commands using a render state structure to keep track of state changes
-  evalCommands = function(renderState, commands) {
-    for (var i = 0; i < commands.length; ++i) {
-      var c = commands[i];
-
-      // Structure:
-      // c[0] = command id
-      
-      // TODO: ... busy here
-      //if (renderState[c[0]])
+  evalCommands = function(renderState, commandsStack) {
+    logDebug("evalCommands");
+    
+    //var newRenderState = new Array(commandEval.length);
+    var newRenderState = commandsStack[0].slice(); // Shallow copy of the state
+    
+    // Update render state from the commandsStack (in reverse)
+    for (var i = commandsStack.length - 2; i >= 0; --i) {
+      var commandsState = commandsStack[i];
+      for (var j = 0; j < commandEval.length; ++j)
+        if (newRenderState[j] == null)
+          newRenderState[j] = commandsState[j];
     }
+    // Copy render state from parents where required
+    for (var i = 0; i < commandEval.length; ++i)
+      if (newRenderState[i] == null)
+        newRenderState[i] = renderState[i];
+    
+    // Do WebGL API calls
+
+    // Shader program
+    if (newRenderState[command.shaderProgram] != renderState[command.shaderProgram])
+      commandEval[command.shaderProgram](newRenderState[command.shaderProgram]);
+    // Shader state
+    for (var i = command.vertexAttribBuffer; i <= command.vertexAttrib4; ++i)
+      if (newRenderState[i] != null && newRenderState[i] !== renderState[i])
+        commandEval[i](newRenderState[i]);
+    // Draw geometry
+    if (newRenderState[command.geometry] != null)
+      commandEval[command.geometry](newRenderState[command.geometry]);
+
+    // Update current render state
+    renderState = newRenderState;
   };
     
   // Append a command to the quey

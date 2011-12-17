@@ -23,12 +23,19 @@
       }
       // Execute the WebGL commands associated with this selector
       var renderSubTree = function(renderState, node) {
-        for (var i = 0; i < node.length; ++i) {
-          var n = node[i];
-          for (var key in n.hashes) {
-            evalCommands(renderState, n.hashes[key]);
-          }
+        for (var key in node.hashes) {
+          var objectCommandStacks = node.hashes[key];
+          for (var i = 0; i < objectCommandStacks.length; ++i)
+            evalCommands(renderState, objectCommandStacks[i]); 
         }
+        /*for (var i = 0; i < node.length; ++i) {
+          var n = node[i];
+          if (typeof n !== 'string') {
+            for (var key in n.hashes) {
+              evalCommands(renderState, n.hashes[key]);
+            }
+          }
+        }*/
       }
       var renderTraverse = function(renderState, node, selector) {
         for (var i = 0; i < node.length; ++i) {
@@ -43,7 +50,7 @@
         }
       };
       for (var key in scenes) {
-        var renderState = [];
+        var renderState = new Array(commandEval.length);
         if (containsAnyTags(key, this._selector))
           renderSubTree(renderState, scenes[key]);
         else
