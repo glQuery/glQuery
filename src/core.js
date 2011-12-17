@@ -72,13 +72,13 @@
         var tags = nodes.split(' ');
         for (var i = 0; i < tags.length; ++i)
           if (typeof tagCommands[tags[i]] === 'undefined')
-            tagCommands[tags[i]] = [];
+            tagCommands[tags[i]] = new Array(commandDispatch.length - commandsSize.sceneGraph);
         return nodes;
       case 'number':
         var str = String(nodes);
         // Make sure tags have a commands stack associated (so that hashes do not need to be rebuilt when non-hashed commands are added to empty tags)
         if (typeof tagCommands[str] === 'undefined')
-          tagCommands[str] = [];
+          tagCommands[str] = new Array(commandDispatch.length - commandsSize.sceneGraph);
         return str;
       case 'object':
         var result = {};

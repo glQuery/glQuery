@@ -9,7 +9,7 @@
       var tagCommandsState = tagCommands[tags[i]];
       if (typeof tagCommandsState === 'undefined')
         continue;
-      commandsStack.splice.apply(commandsStack, [commandsStack.length, 0].concat(tagCommandsState)); // Concatenate tagCommandsState to commandsStack (mutating the original array)
+      commandsStack.push(tagCommandsState); // Concatenate tagCommandsState to commandsStack (mutating the original array)
       var shaderState = tagCommandsState[command.shaderProgram];
       if (shaderState != null) {
         commandsState[command.shaderProgram] = shaderState;

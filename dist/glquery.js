@@ -3,8 +3,8 @@
  * glQuery is free, public domain software (http://creativecommons.org/publicdomain/zero/1.0/)
  * Originally created by Rehno Lindeque of http://www.mischievousmeerkat.com
  */
-"use strict";
 var glQuery = (function() {
+"use strict";
 
   // Define a local copy of glQuery
   var gl = function(selector) {
@@ -80,13 +80,13 @@ var glQuery = (function() {
         var tags = nodes.split(' ');
         for (var i = 0; i < tags.length; ++i)
           if (typeof tagCommands[tags[i]] === 'undefined')
-            tagCommands[tags[i]] = [];
+            tagCommands[tags[i]] = new Array(commandDispatch.length - commandsSize.sceneGraph);
         return nodes;
       case 'number':
         var str = String(nodes);
         // Make sure tags have a commands stack associated (so that hashes do not need to be rebuilt when non-hashed commands are added to empty tags)
         if (typeof tagCommands[str] === 'undefined')
-          tagCommands[str] = [];
+          tagCommands[str] = new Array(commandDispatch.length - commandsSize.sceneGraph);
         return str;
       case 'object':
         var result = {};
@@ -600,7 +600,7 @@ var glQuery = (function() {
       var tagCommandsState = tagCommands[tags[i]];
       if (typeof tagCommandsState === 'undefined')
         continue;
-      commandsStack.splice.apply(commandsStack, [commandsStack.length, 0].concat(tagCommandsState)); // Concatenate tagCommandsState to commandsStack (mutating the original array)
+      commandsStack.push(tagCommandsState); // Concatenate tagCommandsState to commandsStack (mutating the original array)
       var shaderState = tagCommandsState[command.shaderProgram];
       if (shaderState != null) {
         commandsState[command.shaderProgram] = shaderState;
@@ -720,19 +720,26 @@ var glQuery = (function() {
     shaderProgram: 0,
     // Unhashed state (These commands can be updated without resorting)
     geometry: 1,
-    vertexAttribBuffer: 2,
-    vertexAttrib1: 3,
-    vertexAttrib2: 4,
-    vertexAttrib3: 5,
-    vertexAttrib4: 6,
-    vertices: 7,
-    normals: 8,
-    indices: 9,
-    material: 10,
-    light: 11,
+    vertices: 2,
+    normals: 3,
+    indices: 4,
+    material: 5,
+    light: 6,
+    // Unhashed state dictionaries (These commands have an extra key for a variable identifier)
+    vertexAttribBuffer: 7,
+    vertexAttrib1: 8,
+    vertexAttrib2: 9,
+    vertexAttrib3: 10,
+    vertexAttrib4: 11,
     // Scene graph
     insert: 12,
     remove: 13
+  },
+  commandsSize = {
+    hashedState: 1,
+    unhashedState: 6,
+    unhashedStateDictionary: 5,
+    sceneGraph: 2
   },
   commandDispatch = [
     // shaderProgram: 0
@@ -765,38 +772,7 @@ var glQuery = (function() {
             delete tagCommands[selector[i]][command.geometry];
       }
     },
-    // vertexAttribBuffer: 2
-    function(selector,args) {
-      logDebug("dispatch command: vertexAttribBuffer");
-      if (args.length > 1) {
-        for (var i = 0; i < selector.length; ++i) {
-          var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
-          commandsStruct[command.vertexAttribute] = args;
-        }
-      }
-      else {
-        for (var i = 0; i < selector.length; ++i)
-          if (typeof tagCommands[selector[i]] !== 'undefined')
-            delete tagCommands[selector[i]][command.vertexAttribute];
-      }
-    },
-    // vertexAttrib1: 3
-    function(selector,args) {
-      logDebug("dispatch command: vertexAttrib1");
-    },
-    // vertexAttrib2: 4
-    function(selector,args) {
-      logDebug("dispatch command: vertexAttrib2");
-    },
-    // vertexAttrib3: 5
-    function(selector,args) {
-      logDebug("dispatch command: vertexAttrib3");
-    },
-    // vertexAttrib4: 6
-    function(selector,args) {
-      logDebug("dispatch command: vertexAttrib4");
-    },
-    // vertices: 7
+    // vertices: 2
     function(selector,args) {
       logDebug("dispatch command: vertices");
       /*if (args.length > 0) {
@@ -812,11 +788,11 @@ var glQuery = (function() {
             delete tagCommands[selector[i]][command.vertices];
       }*/
     },
-    // normals: 8
+    // normals: 3
     function(selector, args) {
       logDebug("dispatch command: normals");
     },
-    // indices: 9
+    // indices: 4
     function(selector, args) {
       logDebug("dispatch command: indices");
       /*if (args.length > 0) {
@@ -832,13 +808,44 @@ var glQuery = (function() {
             delete tagCommands[selector[i]][command.indices];
       }*/
     },
-    // material: 10
+    // material: 5
     function(selector, args) {
       logDebug("dispatch command: material");
     },
-    // light: 11
+    // light: 6
     function(selector, args) {
       logDebug("dispatch command: light");
+    },
+    // vertexAttribBuffer: 7
+    function(selector,args) {
+      logDebug("dispatch command: vertexAttribBuffer");
+      if (args.length > 1) {
+        for (var i = 0; i < selector.length; ++i) {
+          var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
+          commandsStruct[command.vertexAttribBuffer] = args;
+        }
+      }
+      else {
+        for (var i = 0; i < selector.length; ++i)
+          if (typeof tagCommands[selector[i]] !== 'undefined')
+            delete tagCommands[selector[i]][command.vertexAttribBuffer];
+      }
+    },
+    // vertexAttrib1: 8
+    function(selector,args) {
+      logDebug("dispatch command: vertexAttrib1");
+    },
+    // vertexAttrib2: 9
+    function(selector,args) {
+      logDebug("dispatch command: vertexAttrib2");
+    },
+    // vertexAttrib3: 10
+    function(selector,args) {
+      logDebug("dispatch command: vertexAttrib3");
+    },
+    // vertexAttrib4: 11
+    function(selector,args) {
+      logDebug("dispatch command: vertexAttrib4");
     },
     // insert: 12
     function(selector, args) {
@@ -849,7 +856,8 @@ var glQuery = (function() {
       logDebug("dispatch command: remove");
     }
   ];
-  assert(commandDispatch.length == command.length, "Internal Error: Number of commands in commandDispatch is incorrect.");
+  //assert(commandDispatch.length === command.length, "Internal Error: Number of commands in commandDispatch is incorrect.");
+  assert(commandDispatch.length === commandsSize.hashedState + commandsSize.unhashedState + commandsSize.unhashedStateDictionary + commandsSize.sceneGraph, "Internal Error: Total commands size does not add up to the correct number.");
   
   // Dispatches all commands in the queue
   var dispatchCommands = function(commands) {
