@@ -13,6 +13,8 @@
   dirtyTags = [],
   // All shader definitions
   shaders = {},
+  // All shader uniform and attribute locations
+  shaderLocations = {},
   // Logging / information methods
   logDebug = function(msg) { console.log(msg); },
   logInfo = function(msg) { console.log(msg); },

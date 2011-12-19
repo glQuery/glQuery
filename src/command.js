@@ -28,11 +28,29 @@
     // shaderProgram: 0
     function(selector, args) {
       logDebug("dispatch command: shaderProgram");
+
       if (args.length > 0) {
+        // TODO: Generate shader program if necessary
+        var shaderProgram = args[0]; // (TODO if args[0] == WebGLProgram)....
+        // Cache all associated shader locations (attributes and uniforms)
+        if (shaderLocations[shaderProgram] == null) {
+          var activeAttributes = context.getProgramParameter(shaderProgram, context.ACTIVE_ATTRIBUTES),
+          activeUniforms = context.getProgramParameter(shaderProgram, context.ACTIVE_UNIFORMS),
+          locations = shaderLocations[shaderProgram] = { attributes: {}, uniforms: {} };
+          for (var i = 0; i < activeAttributes; ++i) {
+            var attrib = context.getActiveAttrib(shaderProgram, i);
+            locations.attributes[attrib.name] = context.getAttribLocation(shaderProgram, attrib.name);
+          }
+          for (var i = 0; i < activeUniforms; ++i) {
+            var uniform = context.getActiveUniform(shaderProgram, i);
+            locations.attributes[uniform.name] = context.getAttribLocation(shaderProgram, uniform.name);
+          }
+        }
+        // Add shader program associations to tags
         for (var i = 0; i < selector.length; ++i) {
           //var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
           var commandsStruct = tagCommands[selector[i]];
-          commandsStruct[command.shaderProgram] = args;
+          commandsStruct[command.shaderProgram] = shaderProgram; // Only one argument is ever need
         }
       }
       else {
@@ -48,7 +66,7 @@
         for (var i = 0; i < selector.length; ++i) {
           //var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
           var commandsStruct = tagCommands[selector[i]];
-          commandsStruct[command.geometry] = args[0];
+          commandsStruct[command.geometry] = args[0]; // Only one argument is ever needed
         }
       }
       else {
@@ -145,11 +163,19 @@
     // shaderProgram: 0
     function(context, renderState, args) {
       logDebug("eval command: shaderProgram");
+      context.useProgram(args);
+      renderState.shaderProgram = args;
     },
     // geometry: 1
     function(context, renderState, args) {
       logDebug("eval command: geometry");
       context.drawArrays(args, 0, renderState.numVertices);
+      /*context.drawArrays(args, 0,
+        args === gl.TRIANGLES? renderState.numVertices / 3 : (
+        args === gl.TRIANGLE_FAN || args === TRIANGLE_STRIP? renderState.numVertices - 2 : (
+        args === gl.LINES? renderState.numVertices / 2 : (
+        args === gl.LINE_STRIP? renderState.numVertices - 1 : (
+        /*args === gl.POINTS || args === gl.LINE_LOOP?* renderState.numVertices)))));*/
     },
     // vertices: 2
     function(context, renderState, args) {
@@ -174,9 +200,20 @@
     // vertexAttribBuffer: 7
     function(context, renderState, args) {
       logDebug("eval command: vertexAttribBuffer");
-      context.bindBuffer(context.ARRAY_BUFFER, args[0]);
-      context.vertexAttribPointer(args[1], args[2], args[3], args[4], args[5], args[6]);
-      renderState.numVertices = args[2];
+      var locations = (renderState.shaderProgram != null? shaderLocations[shaderProgram] : null);
+      if (typeof locations !== 'undefined') {
+        var attribLocation = locations.attributes[args[0]];
+        if (typeof attribLocation !== 'undefined' && attribLocation !== -1) {
+          // TODO: Don't rebind buffer if not necessary?
+          context.bindBuffer(context.ARRAY_BUFFER, args[1]); 
+          // TODO: Don't re-enable attribute array if not necessary?
+          context.enableVertexAttribArray(attribLocation);
+          // TODO: Use additional information from the WebGLActiveInfo struct for parameters?
+          // TODO: Get type (e.g. gl.FLOAT) from WebGLActiveInfo
+          context.vertexAttribPointer(attribLocation, args[2], gl.FLOAT, args[3], args[4], args[5]);
+          renderState.numVertices = args[2];
+        }
+      }
     },
     // vertexAttrib1: 8
     function(context, renderState, args) {

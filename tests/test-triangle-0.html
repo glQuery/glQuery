@@ -72,11 +72,7 @@
     context.attachShader(shaderProgram, vertexShader);
     context.attachShader(shaderProgram, fragmentShader);
     context.linkProgram(shaderProgram);
-    context.useProgram(shaderProgram);
     
-    var vboAttribLocation = context.getAttribLocation(shaderProgram, "position");
-    context.enableVertexAttribArray(vboAttribLocation);
-
     // Initialize buffers
     var positions = [
        0.0,  0.9,  0.0,
@@ -90,14 +86,18 @@
     //* TEST: Draw the scene with glQuery
     var gl = glQuery;
     gl.scene({'main': ''})
-    //.vertexAttrib('position', vbo, 3, false, 0, 0)
-    .vertexAttrib(vbo, vboAttribLocation, 3, gl.FLOAT, false, 0, 0)
+    .shaderProgram(shaderProgram)
+    .vertexAttrib('position', vbo, 3, false, 0, 0)
+    //.vertexAttrib(vboAttribLocation, vbo, 3, gl.FLOAT, false, 0, 0)
     .triangles()
     .render(context);
     //*/
 
     /* TEST: Draw the scene manually (for comparison)
-    //context.bindBuffer(context.ARRAY_BUFFER, vbo);
+    var vboAttribLocation = context.getAttribLocation(shaderProgram, "position");
+    context.useProgram(shaderProgram);    
+    context.enableVertexAttribArray(vboAttribLocation);
+    context.bindBuffer(context.ARRAY_BUFFER, vbo);
     context.vertexAttribPointer(vboAttribLocation, 3, context.FLOAT, false, 0, 0);
     context.drawArrays(context.TRIANGLES, 0, 3);
     //*/
