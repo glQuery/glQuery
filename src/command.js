@@ -202,7 +202,7 @@
       logDebug("eval command: vertexAttribBuffer");
       var locations = (renderState.shaderProgram != null? shaderLocations[shaderProgram] : null);
       if (typeof locations !== 'undefined') {
-        var attribLocation = locations.attributes[args[0]];
+        var attribLocation = (typeof args[0] == 'number'? args[0] : locations.attributes[args[0]]);
         if (typeof attribLocation !== 'undefined' && attribLocation !== -1) {
           // TODO: Don't rebind buffer if not necessary?
           context.bindBuffer(context.ARRAY_BUFFER, args[1]); 
