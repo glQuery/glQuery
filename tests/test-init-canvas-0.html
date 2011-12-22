@@ -47,30 +47,7 @@
     gl.canvas('glqueryCanvas')
     .clearColor(0.0,0.0,0.0,1.0)
     .start('main');
-
-    gl.shader('vs',
-      "attribute vec3 position;\n" +
-      "uniform mat4 model;\n" +
-      "uniform mat4 projection;\n" +
-      "\n" +
-      "void main(void) {\n" +
-      "  gl_Position = projection * model * vec4(position, 1.0);\n" +
-      "}\n");
-
-    gl.shader('fs', 
-      "#ifdef GL_ES\n" +
-      "  precision highp float;\n" +
-      "#endif\n" +
-      "\n" +
-      "void main(void) {\n" +
-      "  gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);\n" +
-      "}\n");
-
-    gl.scene({'main': ''})
-    .shaderProgram('vs', 'fs')
-    .vertices()
-    .indices()
-    .triangles();
   </script>
+  <p>You should see an empty black background.</p>
 </body>
 </html>
