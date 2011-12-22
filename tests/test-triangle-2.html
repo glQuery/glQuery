@@ -68,10 +68,6 @@
       "}\n");
     context.compileShader(vertexShader);
     context.compileShader(fragmentShader);
-    var shaderProgram = context.createProgram();
-    context.attachShader(shaderProgram, vertexShader);
-    context.attachShader(shaderProgram, fragmentShader);
-    context.linkProgram(shaderProgram);
     
     // Initialize buffers
     var positions = [
@@ -82,18 +78,23 @@
     var vbo = context.createBuffer();
     context.bindBuffer(context.ARRAY_BUFFER, vbo);
     context.bufferData(context.ARRAY_BUFFER, new Float32Array(positions), context.STATIC_DRAW);
-    var vboAttribLocation = context.getAttribLocation(shaderProgram, 'position');
 
     //* TEST: Draw the scene with glQuery
     var gl = glQuery;
-    gl.scene({'scene': ''})
-    .shaderProgram(shaderProgram)
-    .vertexAttrib(vboAttribLocation, vbo, 3, gl.FLOAT, false, 0, 0)
+    gl.scene({'main': ''})
+    .shaderProgram(vertexShader, fragmentShader)
+    .vertexAttrib('position', vbo, 3, false, 0, 0)
     .triangles()
     .render(context);
     //*/
 
     /* TEST: Draw the scene manually (for comparison)
+    var shaderProgram = context.createProgram();
+    context.attachShader(shaderProgram, vertexShader);
+    context.attachShader(shaderProgram, fragmentShader);
+    context.linkProgram(shaderProgram);
+
+    var vboAttribLocation = context.getAttribLocation(shaderProgram, "position");
     context.useProgram(shaderProgram);    
     context.enableVertexAttribArray(vboAttribLocation);
     context.bindBuffer(context.ARRAY_BUFFER, vbo);
