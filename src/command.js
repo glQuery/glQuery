@@ -30,8 +30,22 @@
       logDebug("dispatch command: shaderProgram");
 
       if (args.length > 0) {
-        // TODO: Generate shader program if necessary
-        var shaderProgram = args[0]; // (TODO if args[0] == WebGLProgram)....
+        // Generate shader program if necessary
+        // instanceof appears to be a valid test according to the khronos conformance suite
+        // https://cvs.khronos.org/svn/repos/registry/trunk/public/webgl/sdk/tests/conformance/misc/instanceof-test.html
+        var shaderProgram;
+        if (args[0] instanceof WebGLProgram)
+          shaderProgram = args[0];
+        else if (args[0] instanceof WebGLShader) {
+          // TODO: There's no context available for this instance
+          // shaderProgram = context.createProgram();
+          // for (var i = 0; i < args.length; ++i) {
+          //   context.attachShader(shaderProgram, args[i]);
+          // }
+          // context.linkProgram(shaderProgram);
+          logError("Internal Error: shaderProgram(WebGLShader, ...) is not yet supported by glQuery.");
+          return
+        }
         // Cache all associated shader locations (attributes and uniforms)
         if (shaderLocations[shaderProgram] == null) {
           var activeAttributes = context.getProgramParameter(shaderProgram, context.ACTIVE_ATTRIBUTES),
@@ -201,7 +215,7 @@
     function(context, renderState, args) {
       logDebug("eval command: vertexAttribBuffer");
       var locations = (renderState.shaderProgram != null? shaderLocations[shaderProgram] : null);
-      if (typeof locations !== 'undefined') {
+      if (locations != null) {
         var attribLocation = (typeof args[0] == 'number'? args[0] : locations.attributes[args[0]]);
         if (typeof attribLocation !== 'undefined' && attribLocation !== -1) {
           // TODO: Don't rebind buffer if not necessary?
