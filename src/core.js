@@ -18,9 +18,9 @@
   // Logging / information methods
   logDebug = function(msg) { console.log(msg); },
   logInfo = function(msg) { console.log(msg); },
-  logWarning = function(msg) { console.log(msg); },
-  logError = function(msg) { console.log(msg); },
-  logApiError = function(func,msg) { console.log("In call to '" + func + "', " + msg); },
+  logWarning = function(msg) { console.warn(msg); },
+  logError = function(msg) { console.error(msg); },
+  logApiError = function(func,msg) { console.error("In call to '" + func + "', " + msg); },
   // Run-time checks
   // TODO: Should we provide checks that throw exceptions rather than logging messages?
   assert = function(condition, msg) { if (!condition) logError(msg); return condition; },
