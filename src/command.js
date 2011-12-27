@@ -90,6 +90,7 @@
     // vertexElem: 2
     function(context, selector, args) {
       logDebug("dispatch command: vertexElem");
+      // Pre-conditions: args.length == 0 || args.length >= 2
       // If no arguments were given, delete the command
       if (args[0] == null) {
         for (var i = 0; i < selector.length; ++i)
@@ -97,16 +98,16 @@
             delete tagCommands[selector[i]][command.vertexElem];
         return;
       }
-      // Cache the buffer size parameter
+      /* Cache the buffer size parameter
       if (args[0]._glquery_BUFFER_SIZE == null) {
         context.bindBuffer(context.ELEMENT_ARRAY_BUFFER, args[0]);
         args[0]._glquery_BUFFER_SIZE = context.getBufferParameter(context.ELEMENT_ARRAY_BUFFER, context.BUFFER_SIZE);
-      }
+      }//*/
       // Add default arguments
       switch (args.length) {
-        case 1:
-          args.push(context.UNSIGNED_SHORT);
         case 2:
+          args.push(context.UNSIGNED_SHORT);
+        case 3:
           args.push(0);
       }
       // Store the command
@@ -118,6 +119,7 @@
     // vertexAttribBuffer: 3
     function(context, selector, args) {
       logDebug("dispatch command: vertexAttribBuffer");
+      // Pre-conditions: args.length == 0 || args.length == 1 || args.length >= 3
       // If no arguments were supplied, delete all the vertexAttribBuffer commands
       if (args[0] == null) {
         for (var i = 0; i < selector.length; ++i)
@@ -130,11 +132,11 @@
         // TODO...
         return;
       }
-      // Cache the buffer size parameter
+      /* Cache the buffer size parameter
       if (args[1]._glquery_BUFFER_SIZE == null) {
         context.bindBuffer(context.ARRAY_BUFFER, args[1]);
         args[1]._glquery_BUFFER_SIZE = context.getBufferParameter(context.ARRAY_BUFFER, context.BUFFER_SIZE);
-      }
+      }//*/
       // Add default arguments
       // TODO...
       // Store the command
@@ -188,9 +190,9 @@
       logDebug("eval command: vertexElem");
       // TODO: Don't rebind buffer if not necessary?
       context.bindBuffer(context.ELEMENT_ARRAY_BUFFER, args[0]); 
-      renderState.numVertices = args[0]._glquery_BUFFER_SIZE / webglTypeSize[args[1] - gl.BYTE];
-      renderState.elementsType = args[1];
-      renderState.elementsOffset = args[2];
+      renderState.numVertices = args[1];
+      renderState.elementsType = args[2];
+      renderState.elementsOffset = args[3];
       renderState.useElements = true;
     },
     // vertexAttribBuffer: 3
@@ -206,9 +208,9 @@
           context.enableVertexAttribArray(attribLocation);
           // TODO: Use additional information from the WebGLActiveInfo struct for parameters?
           // TODO: Get type (e.g. gl.FLOAT) from WebGLActiveInfo instead?
-          context.vertexAttribPointer(attribLocation, args[3], args[2], args[4], args[5], args[6]);
+          context.vertexAttribPointer(attribLocation, args[4], args[3], args[5], args[6], args[7]);
           if (!renderState.useElements)
-            renderState.numVertices = args[1]._glquery_BUFFER_SIZE / (webglTypeSize[args[2] - gl.BYTE] * args[3]);
+            renderState.numVertices = Math.min(renderState.numVertices, args[2] / args[4]);
         }
       }
     },
@@ -250,7 +252,7 @@
     
     //var newRenderState = new Array(commandEval.length);
     var newRenderState = commandsStack[0].slice(); // Shallow copy of the state
-    newRenderState.numVertices = 0;
+    newRenderState.numVertices = Number.POSITIVE_INFINITY;
     newRenderState.elementsOffset = 0;
     newRenderState.elementsType = context.UNSIGNED_SHORT;
     newRenderState.useElements = false;

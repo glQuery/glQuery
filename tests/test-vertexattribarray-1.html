@@ -87,7 +87,7 @@
     var gl = glQuery;
     gl.scene({'main': ''})
     .shaderProgram(shaderProgram)
-    .vertexAttrib('position', vbo, gl.FLOAT, 3, false, 0, 0)
+    .vertexAttrib('position', vbo, 9, gl.FLOAT, 3, false, 0, 0)
     .triangles()
     .render(context);
     //*/
