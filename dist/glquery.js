@@ -808,7 +808,7 @@ var glQuery = (function() {
         for (var i = 0; i < selector.length; ++i) {
           //var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
           var commandsStruct = tagCommands[selector[i]];
-          commandsStruct[command.geometry] = args[0]; // Only one argument is ever needed
+          commandsStruct[command.geometry] = args;
         }
       }
       else {
@@ -909,9 +909,9 @@ var glQuery = (function() {
     function(context, renderState, args) {
       logDebug("eval command: geometry");
       if (renderState.useElements)
-        context.drawElements(args, renderState.numVertices, renderState.elementsType, renderState.elementsOffset);
+        context.drawElements(args[0], args[1] != null? args[1] : renderState.numVertices, renderState.elementsType, renderState.elementsOffset + (args[2] != null? args[2] : 0));
       else
-        context.drawArrays(args, 0, renderState.numVertices);
+        context.drawArrays(args[0], args[2] != null? args[2] : 0, args[1] != null? args[1] : renderState.numVertices);
     },
     // vertexElem: 2
     function(context, renderState, args) {
@@ -1104,39 +1104,54 @@ var glQuery = (function() {
       commands.push([command.shaderProgram, this._selector, Array.prototype.slice.call(arguments)]);
       return this;
     },
+    geometry: function() {
+      logDebug("geometry");
+      commands.push([command.geometry, this._selector, Array.prototype.slice.call(arguments)]);
+      return this;
+    },
+    points: function() {
+      logDebug("points");
+      commands.push([command.geometry, this._selector, [gl.POINTS].concat(Array.prototype.slice.call(arguments))]);
+      return this;
+    },
+    lines: function() {
+      logDebug("lines");
+      commands.push([command.geometry, this._selector, [gl.LINES].concat(Array.prototype.slice.call(arguments))]);
+      return this;
+    },
+    lineLoop: function() {
+      logDebug("lineLoop");
+      commands.push([command.geometry, this._selector, [gl.LINE_LOOP].concat(Array.prototype.slice.call(arguments))]);
+      return this;
+    },
+    lineStrip: function() {
+      logDebug("lineStrip");
+      commands.push([command.geometry, this._selector, [gl.LINE_STRIP].concat(Array.prototype.slice.call(arguments))]);
+      return this;
+    },
     triangles: function() {
       logDebug("triangles");
-      commands.push([command.geometry, this._selector, [gl.TRIANGLES]]);
+      commands.push([command.geometry, this._selector, [gl.TRIANGLES].concat(Array.prototype.slice.call(arguments))]);
+      return this;
+    },
+    triangleStrip: function() {
+      logDebug("triangleStrip");
+      commands.push([command.geometry, this._selector, [gl.TRIANGLE_STRIP].concat(Array.prototype.slice.call(arguments))]);
+      return this;
+    },
+    triangleFan: function() {
+      logDebug("triangleFan");
+      commands.push([command.geometry, this._selector, [gl.TRIANGLE_FAN].concat(Array.prototype.slice.call(arguments))]);
       return this;
     },
     vertexAttrib: function() {
       logDebug("vertexAttrib");
-      commands.push([command.vertexAttribBuffer, this._selector, Array.prototype.slice.call(arguments)]);
+      commands.push([command.vertexAttribBuffer, this._selector, Array.prototype.slice.call(Array.prototype.slice.call(arguments))]);
       return this;
     },
     vertexElem: function() {
       logDebug("vertexElem");
-      commands.push([command.vertexElem, this._selector, Array.prototype.slice.call(arguments)]);
-      return this;
-    },
-    indices: function() {
-      logDebug("indices");
-      commands.push([command.indices, this._selector, Array.prototype.slice.call(arguments)]);
-      return this;
-    },
-    vertices: function() {
-      logDebug("vertices");
-      commands.push([command.vertices, this._selector, Array.prototype.slice.call(arguments)]);
-      return this;
-    },
-    material: function() {
-      logDebug("material");
-      commands.push([command.material, this._selector, Array.prototype.slice.call(arguments)]);
-      return this;
-    },
-    light: function() {
-      logDebug("light");
-      commands.push([command.light, this._selector, Array.prototype.slice.call(arguments)]);
+      commands.push([command.vertexElem, this._selector, Array.prototype.slice.call(Array.prototype.slice.call(arguments))]);
       return this;
     }
   };

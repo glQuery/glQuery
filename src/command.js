@@ -78,7 +78,7 @@
         for (var i = 0; i < selector.length; ++i) {
           //var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
           var commandsStruct = tagCommands[selector[i]];
-          commandsStruct[command.geometry] = args[0]; // Only one argument is ever needed
+          commandsStruct[command.geometry] = args;
         }
       }
       else {
@@ -179,9 +179,9 @@
     function(context, renderState, args) {
       logDebug("eval command: geometry");
       if (renderState.useElements)
-        context.drawElements(args, renderState.numVertices, renderState.elementsType, renderState.elementsOffset);
+        context.drawElements(args[0], args[1] != null? args[1] : renderState.numVertices, renderState.elementsType, renderState.elementsOffset + (args[2] != null? args[2] : 0));
       else
-        context.drawArrays(args, 0, renderState.numVertices);
+        context.drawArrays(args[0], args[2] != null? args[2] : 0, args[1] != null? args[1] : renderState.numVertices);
     },
     // vertexElem: 2
     function(context, renderState, args) {
