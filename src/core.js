@@ -123,3 +123,14 @@
         || window.msCancelRequestAnimationFrame
         || window.clearTimeout;
   })();
+
+  var webglTypeSize = [
+    1, // BYTE
+    1, // UNSIGNED_BYTE
+    2, // SHORT
+    2, // UNSIGNED_SHORT
+    4, // INT
+    4, // UNSIGNED_INT
+    4  // FLOAT
+  ];
+

@@ -12,7 +12,7 @@
       if (!assertType(context, 'object', 'render', 'context')) return this;
       // TODO: assert that the context is a WebGL context specifically
       // Dispatch all commands waiting in the queue
-      dispatchCommands(commands);
+      dispatchCommands(context, commands);
       // Update the state hashes for sorting commands
       // (It could theoretically be faster to update only the scenes that are needed for the selector)
       if (dirtyTags.length > 0) {
@@ -81,6 +81,11 @@
     vertexAttrib: function() {
       logDebug("vertexAttrib");
       commands.push([command.vertexAttribBuffer, this._selector, Array.prototype.slice.call(arguments)]);
+      return this;
+    },
+    vertexElem: function() {
+      logDebug("vertexElem");
+      commands.push([command.vertexElem, this._selector, Array.prototype.slice.call(arguments)]);
       return this;
     },
     indices: function() {

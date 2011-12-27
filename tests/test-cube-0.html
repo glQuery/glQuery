@@ -101,17 +101,17 @@
     context.bindBuffer(context.ELEMENT_ARRAY_BUFFER, ibo);
     context.bufferData(context.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), context.STATIC_DRAW);
     
-    /* TEST: Draw the scene with glQuery
+    //* TEST: Draw the scene with glQuery
     var gl = glQuery;
     gl.scene({'main': ''})
     .shaderProgram(shaderProgram)
-    .vertexAttrib('position', vbo, 3, false, 0, 0)
-    .vertexElem(ibo, 0)
+    .vertexAttrib('position', vbo, gl.FLOAT, 3, false, 0, 0)
+    .vertexElem(ibo, gl.UNSIGNED_SHORT, 0)
     .triangles()
     .render(context);
     //*/
 
-    //* TEST: Draw the scene manually (for comparison)
+    /* TEST: Draw the scene manually (for comparison)
     var vboAttribLocation = context.getAttribLocation(shaderProgram, "position");
     context.useProgram(shaderProgram);    
     context.enableVertexAttribArray(vboAttribLocation);

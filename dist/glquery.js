@@ -26,9 +26,9 @@ var glQuery = (function() {
   // Logging / information methods
   logDebug = function(msg) { console.log(msg); },
   logInfo = function(msg) { console.log(msg); },
-  logWarning = function(msg) { console.log(msg); },
-  logError = function(msg) { console.log(msg); },
-  logApiError = function(func,msg) { console.log("In call to '" + func + "', " + msg); },
+  logWarning = function(msg) { console.warn(msg); },
+  logError = function(msg) { console.error(msg); },
+  logApiError = function(func,msg) { console.error("In call to '" + func + "', " + msg); },
   // Run-time checks
   // TODO: Should we provide checks that throw exceptions rather than logging messages?
   assert = function(condition, msg) { if (!condition) logError(msg); return condition; },
@@ -131,6 +131,17 @@ var glQuery = (function() {
         || window.msCancelRequestAnimationFrame
         || window.clearTimeout;
   })();
+
+  var webglTypeSize = [
+    1, // BYTE
+    1, // UNSIGNED_BYTE
+    2, // SHORT
+    2, // UNSIGNED_SHORT
+    4, // INT
+    4, // UNSIGNED_INT
+    4  // FLOAT
+  ];
+
 
   // WebGL constants
 
@@ -722,30 +733,26 @@ var glQuery = (function() {
     shaderProgram: 0,
     // Unhashed state (These commands can be updated without resorting)
     geometry: 1,
-    vertices: 2,
-    normals: 3,
-    indices: 4,
-    material: 5,
-    light: 6,
+    vertexElem: 2,
     // Unhashed state dictionaries (These commands have an extra key for a variable identifier)
-    vertexAttribBuffer: 7,
-    vertexAttrib1: 8,
-    vertexAttrib2: 9,
-    vertexAttrib3: 10,
-    vertexAttrib4: 11,
+    vertexAttribBuffer: 3,
+    vertexAttrib1: 4,
+    vertexAttrib2: 5,
+    vertexAttrib3: 6,
+    vertexAttrib4: 7,
     // Scene graph
-    insert: 12,
-    remove: 13
+    insert: 8,
+    remove: 9
   },
   commandsSize = {
     hashedState: 1,
-    unhashedState: 6,
+    unhashedState: 2,
     unhashedStateDictionary: 5,
     sceneGraph: 2
   },
   commandDispatch = [
     // shaderProgram: 0
-    function(selector, args) {
+    function(context, selector, args) {
       logDebug("dispatch command: shaderProgram");
 
       if (args.length > 0) {
@@ -766,6 +773,8 @@ var glQuery = (function() {
           return
         }
         // Cache all associated shader locations (attributes and uniforms)
+        // TODO: BUG: We can't index the shader locations by shader program when the shader program is an instance of
+        //            WebGLProgram because toString gives '[object WebGLProgram]'
         if (shaderLocations[shaderProgram] == null) {
           var activeAttributes = context.getProgramParameter(shaderProgram, context.ACTIVE_ATTRIBUTES),
           activeUniforms = context.getProgramParameter(shaderProgram, context.ACTIVE_UNIFORMS),
@@ -793,7 +802,7 @@ var glQuery = (function() {
       }
     },
     // geometry: 1
-    function(selector, args) {
+    function(context, selector, args) {
       logDebug("dispatch command: geometry");
       if (args.length > 0) {
         for (var i = 0; i < selector.length; ++i) {
@@ -808,87 +817,84 @@ var glQuery = (function() {
             delete tagCommands[selector[i]][command.geometry];
       }
     },
-    // vertices: 2
-    function(selector,args) {
-      logDebug("dispatch command: vertices");
-      /*if (args.length > 0) {
-        for (var i = 0; i < selector.length; ++i) {
-          var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]];
-          // TODO: convert argument into a buffer object first... (if it isn't already)
-          commandsStruct[command.vertices] = args[0];
-        }
-      }
-      else {
+    // vertexElem: 2
+    function(context, selector, args) {
+      logDebug("dispatch command: vertexElem");
+      // If no arguments were given, delete the command
+      if (args[0] == null) {
         for (var i = 0; i < selector.length; ++i)
           if (typeof tagCommands[selector[i]] !== 'undefined')
-            delete tagCommands[selector[i]][command.vertices];
-      }*/
-    },
-    // normals: 3
-    function(selector, args) {
-      logDebug("dispatch command: normals");
-    },
-    // indices: 4
-    function(selector, args) {
-      logDebug("dispatch command: indices");
-      /*if (args.length > 0) {
-        for (var i = 0; i < selector.length; ++i) {
-          var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]];
-          // TODO: convert argument into a buffer object first... (if it isn't already)
-          commandsStruct[command.indices] = args[0];
-        }
+            delete tagCommands[selector[i]][command.vertexElem];
+        return;
       }
-      else {
-        for (var i = 0; i < selector.length; ++i)
-          if (typeof tagCommands[selector[i]] !== 'undefined')
-            delete tagCommands[selector[i]][command.indices];
-      }*/
+      // Cache the buffer size parameter
+      if (args[0]._glquery_BUFFER_SIZE == null) {
+        context.bindBuffer(context.ELEMENT_ARRAY_BUFFER, args[0]);
+        args[0]._glquery_BUFFER_SIZE = context.getBufferParameter(context.ELEMENT_ARRAY_BUFFER, context.BUFFER_SIZE);
+      }
+      // Add default arguments
+      switch (args.length) {
+        case 1:
+          args.push(context.UNSIGNED_SHORT);
+        case 2:
+          args.push(0);
+      }
+      // Store the command
+      for (var i = 0; i < selector.length; ++i) {
+        var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
+        commandsStruct[command.vertexElem] = args;
+      }
     },
-    // material: 5
-    function(selector, args) {
-      logDebug("dispatch command: material");
-    },
-    // light: 6
-    function(selector, args) {
-      logDebug("dispatch command: light");
-    },
-    // vertexAttribBuffer: 7
-    function(selector, args) {
+    // vertexAttribBuffer: 3
+    function(context, selector, args) {
       logDebug("dispatch command: vertexAttribBuffer");
-      if (args.length > 1) {
-        for (var i = 0; i < selector.length; ++i) {
-          var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
-          commandsStruct[command.vertexAttribBuffer] = args;
-        }
-      }
-      else {
+      // If no arguments were supplied, delete all the vertexAttribBuffer commands
+      if (args[0] == null) {
         for (var i = 0; i < selector.length; ++i)
           if (typeof tagCommands[selector[i]] !== 'undefined')
             delete tagCommands[selector[i]][command.vertexAttribBuffer];
+        return;
+      }
+      // If no buffer was supplied, delete the vertexAttribBuffer command for the given attribute name
+      if (args[1] == null) {
+        // TODO...
+        return;
+      }
+      // Cache the buffer size parameter
+      if (args[1]._glquery_BUFFER_SIZE == null) {
+        context.bindBuffer(context.ARRAY_BUFFER, args[1]);
+        args[1]._glquery_BUFFER_SIZE = context.getBufferParameter(context.ARRAY_BUFFER, context.BUFFER_SIZE);
+      }
+      // Add default arguments
+      // TODO...
+      // Store the command
+      for (var i = 0; i < selector.length; ++i) {
+        var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
+        commandsStruct[command.vertexAttribBuffer] = args;
       }
     },
-    // vertexAttrib1: 8
-    function(selector, args) {
+    // vertexAttrib1: 4
+    function(context, selector, args) {
       logDebug("dispatch command: vertexAttrib1");
     },
-    // vertexAttrib2: 9
-    function(selector, args) {
+    // vertexAttrib2: 5
+    function(context, selector, args) {
       logDebug("dispatch command: vertexAttrib2");
     },
-    // vertexAttrib3: 10
-    function(selector, args) {
+    // vertexAttrib3: 6
+    function(context, selector, args) {
       logDebug("dispatch command: vertexAttrib3");
     },
-    // vertexAttrib4: 11
-    function(selector, args) {
+    // vertexAttrib4: 7
+    function(context, selector, args) {
       logDebug("dispatch command: vertexAttrib4");
     },
-    // insert: 12
-    function(selector, args) {
+    // insert: 8
+    function(context, selector, args) {
       logDebug("dispatch command: insert");
     },
-    // remove: 13
-    function(selector, args) {
+    // remove: 9
+    function(context, selector, args) {
       logDebug("dispatch command: remove");
     }
   ],
@@ -902,35 +908,22 @@ var glQuery = (function() {
     // geometry: 1
     function(context, renderState, args) {
       logDebug("eval command: geometry");
-      context.drawArrays(args, 0, renderState.numVertices);
-      /*context.drawArrays(args, 0,
-        args === gl.TRIANGLES? renderState.numVertices / 3 : (
-        args === gl.TRIANGLE_FAN || args === TRIANGLE_STRIP? renderState.numVertices - 2 : (
-        args === gl.LINES? renderState.numVertices / 2 : (
-        args === gl.LINE_STRIP? renderState.numVertices - 1 : (
-        /*args === gl.POINTS || args === gl.LINE_LOOP?* renderState.numVertices)))));*/
+      if (renderState.useElements)
+        context.drawElements(args, renderState.numVertices, renderState.elementsType, renderState.elementsOffset);
+      else
+        context.drawArrays(args, 0, renderState.numVertices);
     },
-    // vertices: 2
+    // vertexElem: 2
     function(context, renderState, args) {
-      logDebug("eval command: vertices");
+      logDebug("eval command: vertexElem");
+      // TODO: Don't rebind buffer if not necessary?
+      context.bindBuffer(context.ELEMENT_ARRAY_BUFFER, args[0]); 
+      renderState.numVertices = args[0]._glquery_BUFFER_SIZE / webglTypeSize[args[1] - gl.BYTE];
+      renderState.elementsType = args[1];
+      renderState.elementsOffset = args[2];
+      renderState.useElements = true;
     },
-    // normals: 3
-    function(context, renderState, args) {
-      logDebug("eval command: normals");
-    },
-    // indices: 4
-    function(context, renderState, args) {
-      logDebug("eval command: indices");
-    },
-    // material: 5
-    function(context, renderState, args) {
-      logDebug("eval command: material");
-    },
-    // light: 6
-    function(context, renderState, args) {
-      logDebug("eval command: light");
-    },
-    // vertexAttribBuffer: 7
+    // vertexAttribBuffer: 3
     function(context, renderState, args) {
       logDebug("eval command: vertexAttribBuffer");
       var locations = (renderState.shaderProgram != null? shaderLocations[shaderProgram] : null);
@@ -938,29 +931,30 @@ var glQuery = (function() {
         var attribLocation = (typeof args[0] == 'number'? args[0] : locations.attributes[args[0]]);
         if (typeof attribLocation !== 'undefined' && attribLocation !== -1) {
           // TODO: Don't rebind buffer if not necessary?
-          context.bindBuffer(context.ARRAY_BUFFER, args[1]); 
+          context.bindBuffer(context.ARRAY_BUFFER, args[1]);
           // TODO: Don't re-enable attribute array if not necessary?
           context.enableVertexAttribArray(attribLocation);
           // TODO: Use additional information from the WebGLActiveInfo struct for parameters?
-          // TODO: Get type (e.g. gl.FLOAT) from WebGLActiveInfo
-          context.vertexAttribPointer(attribLocation, args[2], gl.FLOAT, args[3], args[4], args[5]);
-          renderState.numVertices = args[2];
+          // TODO: Get type (e.g. gl.FLOAT) from WebGLActiveInfo instead?
+          context.vertexAttribPointer(attribLocation, args[3], args[2], args[4], args[5], args[6]);
+          if (!renderState.useElements)
+            renderState.numVertices = args[1]._glquery_BUFFER_SIZE / (webglTypeSize[args[2] - gl.BYTE] * args[3]);
         }
       }
     },
-    // vertexAttrib1: 8
+    // vertexAttrib1: 4
     function(context, renderState, args) {
       logDebug("eval command: vertexAttrib1");
     },
-    // vertexAttrib2: 9
+    // vertexAttrib2: 5
     function(context, renderState, args) {
       logDebug("eval command: vertexAttrib2");
     },
-    // vertexAttrib3: 10
+    // vertexAttrib3: 6
     function(context, renderState, args) {
       logDebug("eval command: vertexAttrib3");
     },
-    // vertexAttrib4: 11
+    // vertexAttrib4: 7
     function(context, renderState, args) {
       logDebug("eval command: vertexAttrib4");
     }
@@ -971,13 +965,13 @@ var glQuery = (function() {
   assert(commandEval.length === commandDispatch.length - commandsSize.sceneGraph, "Internal Error: Number of commands in commandEval is incorrect.");
   
   // Dispatches all commands in the queue
-  var dispatchCommands = function(commands) {
+  var dispatchCommands = function(context, commands) {
     for (var i = 0; i < commands.length; ++i) {
       var c = commands[i],
       key = c[0],
       selector = c[1],
       commandArgs = c[2];
-      commandDispatch[key](selector, commandArgs);
+      commandDispatch[key](context, selector, commandArgs);
     }
   },
   // Collect and execute webgl commands using a render state structure to keep track of state changes
@@ -986,6 +980,10 @@ var glQuery = (function() {
     
     //var newRenderState = new Array(commandEval.length);
     var newRenderState = commandsStack[0].slice(); // Shallow copy of the state
+    newRenderState.numVertices = 0;
+    newRenderState.elementsOffset = 0;
+    newRenderState.elementsType = context.UNSIGNED_SHORT;
+    newRenderState.useElements = false;
     
     // Update render state from the commandsStack (in reverse)
     for (var i = commandsStack.length - 2; i >= 0; --i) {
@@ -1006,8 +1004,8 @@ var glQuery = (function() {
     if (shaderProgramCommand != renderState[command.shaderProgram]) {
       commandEval[command.shaderProgram](context, newRenderState, shaderProgramCommand);
     }
-    // Shader state
-    for (var i = command.vertexAttribBuffer; i <= command.vertexAttrib4; ++i) {
+    // Shader state (excluding geometry which is a special case)
+    for (var i = command.vertexElem; i <= command.vertexAttrib4; ++i) {
       var stateCommand = newRenderState[i];
       if (stateCommand != null && stateCommand !== renderState[i])
         commandEval[i](context, newRenderState, stateCommand);
@@ -1045,7 +1043,7 @@ var glQuery = (function() {
       if (!assertType(context, 'object', 'render', 'context')) return this;
       // TODO: assert that the context is a WebGL context specifically
       // Dispatch all commands waiting in the queue
-      dispatchCommands(commands);
+      dispatchCommands(context, commands);
       // Update the state hashes for sorting commands
       // (It could theoretically be faster to update only the scenes that are needed for the selector)
       if (dirtyTags.length > 0) {
@@ -1114,6 +1112,11 @@ var glQuery = (function() {
     vertexAttrib: function() {
       logDebug("vertexAttrib");
       commands.push([command.vertexAttribBuffer, this._selector, Array.prototype.slice.call(arguments)]);
+      return this;
+    },
+    vertexElem: function() {
+      logDebug("vertexElem");
+      commands.push([command.vertexElem, this._selector, Array.prototype.slice.call(arguments)]);
       return this;
     },
     indices: function() {
