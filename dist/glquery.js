@@ -740,14 +740,15 @@ var glQuery = (function() {
     vertexAttrib2: 5,
     vertexAttrib3: 6,
     vertexAttrib4: 7,
+    uniform: 8,
     // Scene graph
-    insert: 8,
-    remove: 9
+    insert: 9,
+    remove: 10
   },
   commandsSize = {
     hashedState: 1,
     unhashedState: 2,
-    unhashedStateDictionary: 5,
+    unhashedStateDictionary: 6,
     sceneGraph: 2
   },
   commandDispatch = [
@@ -891,11 +892,15 @@ var glQuery = (function() {
     function(context, selector, args) {
       logDebug("dispatch command: vertexAttrib4");
     },
-    // insert: 8
+    // uniform: 8
+    function(context, selector, args) {
+      logDebug("dispatch command: uniform");
+    },
+    // insert: 9
     function(context, selector, args) {
       logDebug("dispatch command: insert");
     },
-    // remove: 9
+    // remove: 10
     function(context, selector, args) {
       logDebug("dispatch command: remove");
     }
@@ -928,7 +933,7 @@ var glQuery = (function() {
     // vertexAttribBuffer: 3
     function(context, renderState, args) {
       logDebug("eval command: vertexAttribBuffer");
-      var locations = (renderState.shaderProgram != null? shaderLocations[shaderProgram] : null);
+      var locations = (renderState.shaderProgram != null? shaderLocations[renderState.shaderProgram] : null);
       if (locations != null) {
         var attribLocation = (typeof args[0] == 'number'? args[0] : locations.attributes[args[0]]);
         if (typeof attribLocation !== 'undefined' && attribLocation !== -1) {
@@ -959,6 +964,10 @@ var glQuery = (function() {
     // vertexAttrib4: 7
     function(context, renderState, args) {
       logDebug("eval command: vertexAttrib4");
+    },
+    // uniform: 8
+    function(context, renderState, args) {
+      logDebug("eval command: uniform");
     }
   ];
 
@@ -1007,7 +1016,7 @@ var glQuery = (function() {
       commandEval[command.shaderProgram](context, newRenderState, shaderProgramCommand);
     }
     // Shader state (excluding geometry which is a special case)
-    for (var i = command.vertexElem; i <= command.vertexAttrib4; ++i) {
+    for (var i = command.vertexElem; i <= command.uniform; ++i) {
       var stateCommand = newRenderState[i];
       if (stateCommand != null && stateCommand !== renderState[i])
         commandEval[i](context, newRenderState, stateCommand);
@@ -1154,6 +1163,11 @@ var glQuery = (function() {
     vertexElem: function() {
       logDebug("vertexElem");
       commands.push([command.vertexElem, this._selector, Array.prototype.slice.call(Array.prototype.slice.call(arguments))]);
+      return this;
+    },
+    uniform: function() {
+      logDebug("uniform");
+      commands.push([command.uniform, this._selector, Array.prototype.slice.call(Array.prototype.slice.call(arguments))]);
       return this;
     }
   };
