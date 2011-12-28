@@ -43,10 +43,12 @@
   <!-- Application logic -->
 
   <script>
-    var gl = glQuery;
-    gl.canvas('glqueryCanvas')
-    .clearColor(0.0,0.0,0.0,1.0)
-    .start('main');
+    window.onload = function() {
+      var gl = glQuery;
+      gl.canvas('glqueryCanvas')
+      .clearColor(0.0,0.0,0.0,1.0)
+      .start('main');
+    };
   </script>
   <p>You should see an empty black background.</p>
 </body>

@@ -43,64 +43,66 @@
   <!-- Application logic -->
 
   <script>
-    // Initialize WebGL context
-    var canvas = document.getElementById('glqueryCanvas');
-    var context = canvas.getContext('experimental-webgl');
-    context.viewport(0, 0, canvas.width, canvas.height);
-    context.enable(context.DEPTH_TEST);
-    context.clearColor(0.0, 0.0, 0.0, 1.0);
-    context.clear(context.COLOR_BUFFER_BIT | context.DEPTH_BUFFER_BIT);
+    window.onload = function() {
+      // Initialize WebGL context
+      var canvas = document.getElementById('glqueryCanvas');
+      var context = canvas.getContext('experimental-webgl');
+      context.viewport(0, 0, canvas.width, canvas.height);
+      context.enable(context.DEPTH_TEST);
+      context.clearColor(0.0, 0.0, 0.0, 1.0);
+      context.clear(context.COLOR_BUFFER_BIT | context.DEPTH_BUFFER_BIT);
 
-    // Initialize shaders
-    var vertexShader = context.createShader(context.VERTEX_SHADER);
-    var fragmentShader = context.createShader(context.FRAGMENT_SHADER);
-    context.shaderSource(vertexShader,
-      "attribute vec3 position;\n" +
-      "void main(void) {\n" +
-      "  gl_Position = vec4(position, 1.0);\n" +
-      "}");
-    context.shaderSource(fragmentShader, 
-      "#ifdef GL_ES\n" +
-      "precision highp float;\n" +
-      "#endif\n" +
-      "void main(void) {\n" +
-      "  gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);\n" +
-      "}\n");
-    context.compileShader(vertexShader);
-    context.compileShader(fragmentShader);
-    
-    // Initialize buffers
-    var positions = [
-       0.0,  0.9,  0.0,
-      -0.9, -0.9,  0.0,
-       0.9, -0.9,  0.0
-    ];
-    var vbo = context.createBuffer();
-    context.bindBuffer(context.ARRAY_BUFFER, vbo);
-    context.bufferData(context.ARRAY_BUFFER, new Float32Array(positions), context.STATIC_DRAW);
+      // Initialize shaders
+      var vertexShader = context.createShader(context.VERTEX_SHADER);
+      var fragmentShader = context.createShader(context.FRAGMENT_SHADER);
+      context.shaderSource(vertexShader,
+        "attribute vec3 position;\n" +
+        "void main(void) {\n" +
+        "  gl_Position = vec4(position, 1.0);\n" +
+        "}");
+      context.shaderSource(fragmentShader, 
+        "#ifdef GL_ES\n" +
+        "precision highp float;\n" +
+        "#endif\n" +
+        "void main(void) {\n" +
+        "  gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);\n" +
+        "}\n");
+      context.compileShader(vertexShader);
+      context.compileShader(fragmentShader);
+      
+      // Initialize buffers
+      var positions = [
+         0.0,  0.9,  0.0,
+        -0.9, -0.9,  0.0,
+         0.9, -0.9,  0.0
+      ];
+      var vbo = context.createBuffer();
+      context.bindBuffer(context.ARRAY_BUFFER, vbo);
+      context.bufferData(context.ARRAY_BUFFER, new Float32Array(positions), context.STATIC_DRAW);
 
-    //* TEST: Draw the scene with glQuery
-    var gl = glQuery;
-    gl.scene({'main': ''})
-    .shaderProgram(vertexShader, fragmentShader)
-    .vertexAttrib('position', vbo, 9, gl.FLOAT, 3, false, 0, 0)
-    .triangles()
-    .render(context);
-    //*/
+      //* TEST: Draw the scene with glQuery
+      var gl = glQuery;
+      gl.scene({'main': ''})
+      .shaderProgram(vertexShader, fragmentShader)
+      .vertexAttrib('position', vbo, 9, gl.FLOAT, 3, false, 0, 0)
+      .triangles()
+      .render(context);
+      //*/
 
-    /* TEST: Draw the scene manually (for comparison)
-    var shaderProgram = context.createProgram();
-    context.attachShader(shaderProgram, vertexShader);
-    context.attachShader(shaderProgram, fragmentShader);
-    context.linkProgram(shaderProgram);
+      /* TEST: Draw the scene manually (for comparison)
+      var shaderProgram = context.createProgram();
+      context.attachShader(shaderProgram, vertexShader);
+      context.attachShader(shaderProgram, fragmentShader);
+      context.linkProgram(shaderProgram);
 
-    var vboAttribLocation = context.getAttribLocation(shaderProgram, "position");
-    context.useProgram(shaderProgram);    
-    context.enableVertexAttribArray(vboAttribLocation);
-    context.bindBuffer(context.ARRAY_BUFFER, vbo);
-    context.vertexAttribPointer(vboAttribLocation, 3, context.FLOAT, false, 0, 0);
-    context.drawArrays(context.TRIANGLES, 0, 3);
-    //*/
+      var vboAttribLocation = context.getAttribLocation(shaderProgram, "position");
+      context.useProgram(shaderProgram);    
+      context.enableVertexAttribArray(vboAttribLocation);
+      context.bindBuffer(context.ARRAY_BUFFER, vbo);
+      context.vertexAttribPointer(vboAttribLocation, 3, context.FLOAT, false, 0, 0);
+      context.drawArrays(context.TRIANGLES, 0, 3);
+      //*/
+    };
   </script>
   <p>You should see a white triangle rendered over a black background.</p>
 </body>
