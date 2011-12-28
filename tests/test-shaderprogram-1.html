@@ -95,7 +95,7 @@
       context.attachShader(shaderProgram, fragmentShader);
       context.linkProgram(shaderProgram);
 
-      var vboAttribLocation = context.getAttribLocation(shaderProgram, "position");
+      var vboAttribLocation = context.getAttribLocation(shaderProgram, 'position');
       context.useProgram(shaderProgram);    
       context.enableVertexAttribArray(vboAttribLocation);
       context.bindBuffer(context.ARRAY_BUFFER, vbo);
