@@ -15,6 +15,8 @@
   shaders = {},
   // All shader uniform and attribute locations
   shaderLocations = {},
+  // Counters for identifiers
+  shaderProgramCounter = 0,
   // Logging / information methods
   logDebug = function(msg) { console.log(msg); },
   logInfo = function(msg) { console.log(msg); },

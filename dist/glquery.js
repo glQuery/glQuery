@@ -23,6 +23,8 @@ var glQuery = (function() {
   shaders = {},
   // All shader uniform and attribute locations
   shaderLocations = {},
+  // Counters for identifiers
+  shaderProgramCounter = 0,
   // Logging / information methods
   logDebug = function(msg) { console.log(msg); },
   logInfo = function(msg) { console.log(msg); },
@@ -773,13 +775,16 @@ var glQuery = (function() {
           logError("Internal Error: shaderProgram(WebGLShader, ...) is not yet supported by glQuery.");
           return
         }
+        // Add an index to the shader program (We can't index the shader locations by shader program 
+        // when the shader program is an instance of WebGLProgram because toString simply gives
+        // '[object WebGLProgram]'
+        shaderProgram._glquery_id = shaderProgramCounter;
+        ++shaderProgramCounter;
         // Cache all associated shader locations (attributes and uniforms)
-        // TODO: BUG: We can't index the shader locations by shader program when the shader program is an instance of
-        //            WebGLProgram because toString gives '[object WebGLProgram]'
-        if (shaderLocations[shaderProgram] == null) {
+        if (shaderLocations[shaderProgram._glquery_id] == null) {
           var activeAttributes = context.getProgramParameter(shaderProgram, context.ACTIVE_ATTRIBUTES),
           activeUniforms = context.getProgramParameter(shaderProgram, context.ACTIVE_UNIFORMS),
-          locations = shaderLocations[shaderProgram] = { attributes: {}, uniforms: {} };
+          locations = shaderLocations[shaderProgram._glquery_id] = { attributes: {}, uniforms: {} };
           for (var i = 0; i < activeAttributes; ++i) {
             var attrib = context.getActiveAttrib(shaderProgram, i);
             locations.attributes[attrib.name] = context.getAttribLocation(shaderProgram, attrib.name);
@@ -933,7 +938,7 @@ var glQuery = (function() {
     // vertexAttribBuffer: 3
     function(context, renderState, args) {
       logDebug("eval command: vertexAttribBuffer");
-      var locations = (renderState.shaderProgram != null? shaderLocations[renderState.shaderProgram] : null);
+      var locations = (renderState.shaderProgram != null? shaderLocations[renderState.shaderProgram._glquery_id] : null);
       if (locations != null) {
         var attribLocation = (typeof args[0] == 'number'? args[0] : locations.attributes[args[0]]);
         if (typeof attribLocation !== 'undefined' && attribLocation !== -1) {
