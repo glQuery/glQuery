@@ -59,7 +59,7 @@
           }
           for (var i = 0; i < activeUniforms; ++i) {
             var uniform = context.getActiveUniform(shaderProgram, i);
-            locations.attributes[uniform.name] = context.getAttribLocation(shaderProgram, uniform.name);
+            locations.uniforms[uniform.name] = context.getUniformLocation(shaderProgram, uniform.name);
           }
         }
         // Add shader program associations to tags
@@ -168,6 +168,23 @@
     // uniform: 8
     function(context, selector, args) {
       logDebug("dispatch command: uniform");
+      // If no arguments were supplied, delete all the uniform commands
+      if (args[0] == null) {
+        for (var i = 0; i < selector.length; ++i)
+          if (typeof tagCommands[selector[i]] !== 'undefined')
+            delete tagCommands[selector[i]][command.uniform];
+        return;
+      }
+      // If no argument was supplied, delete the uniform command for the given uniform name
+      if (args[1] == null) {
+        // TODO...
+        return;
+      }
+      // Store the command
+      for (var i = 0; i < selector.length; ++i) {
+        var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
+        commandsStruct[command.uniform] = args;
+      }
     },
     // insert: 9
     function(context, selector, args) {
@@ -241,6 +258,18 @@
     // uniform: 8
     function(context, renderState, args) {
       logDebug("eval command: uniform");
+      var uniformFunctions = [
+        WebGLRenderingContext.prototype.uniform1f,
+        WebGLRenderingContext.prototype.uniform2f,
+        WebGLRenderingContext.prototype.uniform3f
+      ];
+      var locations = (renderState.shaderProgram != null? shaderLocations[renderState.shaderProgram._glquery_id] : null);
+      if (locations != null) {
+        var uniformLocation = (typeof args[0] == 'number'? args[0] : locations.uniforms[args[0]]);
+        if (uniformLocation != null) {
+          uniformFunctions[args.length - 2].apply(context, [uniformLocation].concat(args.slice(1)));
+        }
+      }
     }
   ];
 
