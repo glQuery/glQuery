@@ -110,7 +110,7 @@
       .shaderProgram(shaderProgram)
       .vertexAttrib('position', vbo, 9*8, gl.FLOAT, 3, false, 0, 0)
       .vertexElem(ibo, 6*6, gl.UNSIGNED_SHORT, 0)
-      .uniform('view', gl.setMatrix3Identity())
+      .uniform('view', gl.setMatrix4Identity())
       .triangles()
       .render(context);
       //*/
@@ -123,7 +123,7 @@
       context.bindBuffer(context.ARRAY_BUFFER, vbo);
       context.vertexAttribPointer(vboAttribLocation, 3, context.FLOAT, false, 0, 0);
       context.bindBuffer(context.ELEMENT_ARRAY_BUFFER, ibo);
-      context.uniformMatrix3fv(viewUniformLocation, false, glQueryMath.setMatrix3Identity());
+      context.uniformMatrix4fv(viewUniformLocation, false, glQueryMath.setMatrix4Identity());
       context.drawElements(context.TRIANGLES, 6*6, context.UNSIGNED_SHORT, 0);
       //*/
     };
