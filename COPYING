@@ -40,8 +40,10 @@ MAKING MODIFICATIONS
 
 If you would like to retain copyright on your modifications to glQuery then
 we advise you to please first delete the licenses/LEGALCODE-cc0-1.0 and COPYING
-files in order to avoid any confusion. This will let people know that you do
-not to wish to dedicate your own changes to the public domain.
+files in order to avoid any confusion. When distributing your work you should
+also consider modifying the header (from src/header.js) that is added to the 
+distribution files. This will let people know that you do not to wish to
+dedicate your own changes to the public domain.
 
 The glQuery team will not accept any pull requests or patches that are not
 fully released into the public domain.
