@@ -1009,10 +1009,8 @@ var glQuery = (function() {
       uniformDispatch[gl.FLOAT_MAT2] = function(location, value, transpose) { this.uniformMatrix2fv(location, transpose != null? transpose : false, value); };
       uniformDispatch[gl.FLOAT_MAT3] = function(location, value, transpose) { this.uniformMatrix3fv(location, transpose != null? transpose : false, value); };
       uniformDispatch[gl.FLOAT_MAT4] = function(location, value, transpose) { this.uniformMatrix4fv(location, transpose != null? transpose : false, value); };
-
       //uniformDispatch[gl.SAMPLER_2D] =
       //uniformDispatch[gl.SAMPLER_CUBE] = 
-
 
       return function(context, renderState, args) {
         logDebug("eval command: uniform");
