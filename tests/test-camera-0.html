@@ -124,12 +124,14 @@
       /* TEST: Draw the scene manually (for comparison)
       var vboAttribLocation = context.getAttribLocation(shaderProgram, 'position');
       var viewUniformLocation = context.getUniformLocation(shaderProgram, 'view');
+      var projectionUniformLocation = context.getUniformLocation(shaderProgram, 'projection');
       context.useProgram(shaderProgram);    
       context.enableVertexAttribArray(vboAttribLocation);
       context.bindBuffer(context.ARRAY_BUFFER, vbo);
       context.vertexAttribPointer(vboAttribLocation, 3, context.FLOAT, false, 0, 0);
       context.bindBuffer(context.ELEMENT_ARRAY_BUFFER, ibo);
-      context.uniformMatrix4fv(viewUniformLocation, false, glQueryMath.setMatrix4Identity());
+      context.uniformMatrix4fv(viewUniformLocation, false, glQueryMath.setMatrix4LookAt([10.0,10.0,10.0], [0.0,0.0,0.0], [0.0,1.0,0.0]));
+      context.uniformMatrix4fv(projectionUniformLocation, false, glQueryMath.setMatrix4Ortho(-1.0, 1.0, -1.0, 1.0, 0.1, 100.0));
       context.drawElements(context.TRIANGLES, 6*6, context.UNSIGNED_SHORT, 0);
       //*/
     };
