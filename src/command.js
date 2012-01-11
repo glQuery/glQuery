@@ -186,8 +186,12 @@
       }
       // Store the command
       for (var i = 0; i < selector.length; ++i) {
-        var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]);
-        commandsStruct[command.uniform] = args;
+        var commandsStruct = (typeof tagCommands[selector[i]] === 'undefined'? (tagCommands[selector[i]] = {}) : tagCommands[selector[i]]),
+        uniformTable = commandsStruct[command.uniform];
+        if(uniformTable == null)
+          uniformTable = commandsStruct[command.uniform] = {};
+        //commandsStruct[command.uniform] = args;
+        uniformTable[args[0]] = args.slice(1);
       }
     },
     // insert: 9
@@ -261,24 +265,24 @@
     },
     // uniform: 8
     (function() {
-      var uniformDispatch = {};
-      uniformDispatch[gl.FLOAT] = WebGLRenderingContext.prototype.uniform1f;
-      uniformDispatch[gl.FLOAT_VEC2] = WebGLRenderingContext.prototype.uniform2f;
-      uniformDispatch[gl.FLOAT_VEC3] = WebGLRenderingContext.prototype.uniform3f;
-      uniformDispatch[gl.FLOAT_VEC4] = WebGLRenderingContext.prototype.uniform4f;
-      uniformDispatch[gl.INT] = WebGLRenderingContext.prototype.uniform1i;
-      uniformDispatch[gl.INT_VEC2] = WebGLRenderingContext.prototype.uniform2i;
-      uniformDispatch[gl.INT_VEC3] = WebGLRenderingContext.prototype.uniform3i;
-      uniformDispatch[gl.INT_VEC4] = WebGLRenderingContext.prototype.uniform4i;
-      uniformDispatch[gl.BOOL] = WebGLRenderingContext.prototype.uniform1i;
-      uniformDispatch[gl.BOOL_VEC2] = WebGLRenderingContext.prototype.uniform2i;
-      uniformDispatch[gl.BOOL_VEC3] = WebGLRenderingContext.prototype.uniform3i;
-      uniformDispatch[gl.BOOL_VEC4] = WebGLRenderingContext.prototype.uniform4i;
-      uniformDispatch[gl.FLOAT_MAT2] = function(location, value, transpose) { this.uniformMatrix2fv(location, transpose != null? transpose : false, value); };
-      uniformDispatch[gl.FLOAT_MAT3] = function(location, value, transpose) { this.uniformMatrix3fv(location, transpose != null? transpose : false, value); };
-      uniformDispatch[gl.FLOAT_MAT4] = function(location, value, transpose) { this.uniformMatrix4fv(location, transpose != null? transpose : false, value); };
-      //uniformDispatch[gl.SAMPLER_2D] =
-      //uniformDispatch[gl.SAMPLER_CUBE] = 
+      var uniformEval = {};
+      uniformEval[gl.FLOAT] = WebGLRenderingContext.prototype.uniform1f;
+      uniformEval[gl.FLOAT_VEC2] = WebGLRenderingContext.prototype.uniform2f;
+      uniformEval[gl.FLOAT_VEC3] = WebGLRenderingContext.prototype.uniform3f;
+      uniformEval[gl.FLOAT_VEC4] = WebGLRenderingContext.prototype.uniform4f;
+      uniformEval[gl.INT] = WebGLRenderingContext.prototype.uniform1i;
+      uniformEval[gl.INT_VEC2] = WebGLRenderingContext.prototype.uniform2i;
+      uniformEval[gl.INT_VEC3] = WebGLRenderingContext.prototype.uniform3i;
+      uniformEval[gl.INT_VEC4] = WebGLRenderingContext.prototype.uniform4i;
+      uniformEval[gl.BOOL] = WebGLRenderingContext.prototype.uniform1i;
+      uniformEval[gl.BOOL_VEC2] = WebGLRenderingContext.prototype.uniform2i;
+      uniformEval[gl.BOOL_VEC3] = WebGLRenderingContext.prototype.uniform3i;
+      uniformEval[gl.BOOL_VEC4] = WebGLRenderingContext.prototype.uniform4i;
+      uniformEval[gl.FLOAT_MAT2] = function(location, value, transpose) { this.uniformMatrix2fv(location, transpose != null? transpose : false, value); };
+      uniformEval[gl.FLOAT_MAT3] = function(location, value, transpose) { this.uniformMatrix3fv(location, transpose != null? transpose : false, value); };
+      uniformEval[gl.FLOAT_MAT4] = function(location, value, transpose) { this.uniformMatrix4fv(location, transpose != null? transpose : false, value); };
+      //uniformEval[gl.SAMPLER_2D] =
+      //uniformEval[gl.SAMPLER_CUBE] = 
 
       return function(context, renderState, args) {
         logDebug("eval command: uniform");
@@ -289,20 +293,19 @@
           // TODO: How to get the uniform info if it is already given as a UniformLocation object?
           //       Can we query/cache it in a fast way?
           //       Probably need to set up benchmark for this...
-          var uniformInfo = null,
-              uniformLocation = null;
-          if (args[0] instanceof WebGLUniformLocation) {
-            console.log(uniformLocation);	
-            uniformLocation = args[0];
-            // TODO: uniformInfo = locations.uniforms[args[0]];
+          for (var uniformName in args) { // args is a table of uniforms
+            /* Not supported: WebGLUniformLocation - (because uniform locations are specific to some shader program)
+            if (key instanceof WebGLUniformLocation) {
+              console.log(uniformLocation);	
+              uniformLocation = args[0];
+              // TODO: uniformInfo = locations.uniforms[args[0]];
+            }*/
+            var uniformInfo = locations.uniforms[uniformName],
+            uniformLocation = uniformInfo.location,
+            uniformArgs = args[uniformName];
+            if (uniformLocation != null && uniformInfo != null)
+              uniformEval[uniformInfo.type].apply(context, [uniformLocation].concat(uniformArgs));
           }
-          else {
-            uniformInfo = locations.uniforms[args[0]];
-            uniformLocation = uniformInfo.location;
-          }
-          //var uniformLocation = (typeof args[0] == 'number'? args[0] : uniformInfo.location);
-          if (uniformLocation != null && uniformInfo != null)
-            uniformDispatch[uniformInfo.type].apply(context, [uniformLocation].concat(args.slice(1)));
         }
       };
     })()
