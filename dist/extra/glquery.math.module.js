@@ -33,8 +33,8 @@ glQueryMath.vec2.add = function(a,b,dest) {
   return dest;
 };
 glQueryMath.vec2.subtract = function(a,b,dest) {
-  dest[0] = b[0] - a[0];
-  dest[1] = b[1] - a[1];
+  dest[0] = a[0] - b[0];
+  dest[1] = a[1] - b[1];
   return dest;
 };
 glQueryMath.vec2.neg = function(a,dest) {
@@ -104,10 +104,10 @@ glQueryMath.vec4.add = function(a,b,dest) {
   return dest;
 };
 glQueryMath.vec4.subtract = function(a,b,dest) {
-  dest[0] = b[0] - a[0];
-  dest[1] = b[1] - a[1];
-  dest[2] = b[2] - a[2];
-  dest[3] = b[3] - a[3];
+  dest[0] = a[0] - b[0];
+  dest[1] = a[1] - b[1];
+  dest[2] = a[2] - b[2];
+  dest[3] = a[3] - b[3];
   return dest;
 };
 glQueryMath.vec4.neg = function(a,dest) {
