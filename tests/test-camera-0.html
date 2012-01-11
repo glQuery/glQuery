@@ -59,8 +59,9 @@
       context.shaderSource(vertexShader,
         "attribute vec3 position;\n" +
         "uniform mat4 view;\n" +
+        "uniform mat4 projection;\n" +
         "void main(void) {\n" +
-        "  gl_Position = vec4(position, 1.0) * view;\n" +
+        "  gl_Position = projection * view * vec4(position, 1.0);\n" +
         "}");
       context.shaderSource(fragmentShader, 
         "#ifdef GL_ES\n" +
@@ -77,15 +78,16 @@
       context.linkProgram(shaderProgram);
       
       // Initialize buffers
+      var z = 0.0;
       var positions = [
-         0.5, 0.5,-0.5 - 1.0,   0.5,-0.5,-0.5 - 1.0,  -0.5,-0.5,-0.5 - 1.0,
-        -0.5, 0.5,-0.5 - 1.0,   0.5, 0.5, 0.5 - 1.0,   0.5,-0.5, 0.5 - 1.0,
-        -0.5,-0.5, 0.5 - 1.0,  -0.5, 0.5, 0.5 - 1.0,   0.5, 0.5,-0.5 - 1.0,
-         0.5, 0.5, 0.5 - 1.0,   0.5,-0.5, 0.5 - 1.0,   0.5,-0.5,-0.5 - 1.0,
-         0.5,-0.5,-0.5 - 1.0,   0.5,-0.5, 0.5 - 1.0,  -0.5,-0.5, 0.5 - 1.0,
-        -0.5,-0.5,-0.5 - 1.0,  -0.5,-0.5,-0.5 - 1.0,  -0.5,-0.5, 0.5 - 1.0,
-        -0.5, 0.5, 0.5 - 1.0,  -0.5, 0.5,-0.5 - 1.0,   0.5, 0.5, 0.5 - 1.0,
-         0.5, 0.5,-0.5 - 1.0,  -0.5, 0.5,-0.5 - 1.0,  -0.5, 0.5, 0.5 - 1.0
+         0.5, 0.5,-0.5 + z,   0.5,-0.5,-0.5 + z,  -0.5,-0.5,-0.5 + z,
+        -0.5, 0.5,-0.5 + z,   0.5, 0.5, 0.5 + z,   0.5,-0.5, 0.5 + z,
+        -0.5,-0.5, 0.5 + z,  -0.5, 0.5, 0.5 + z,   0.5, 0.5,-0.5 + z,
+         0.5, 0.5, 0.5 + z,   0.5,-0.5, 0.5 + z,   0.5,-0.5,-0.5 + z,
+         0.5,-0.5,-0.5 + z,   0.5,-0.5, 0.5 + z,  -0.5,-0.5, 0.5 + z,
+        -0.5,-0.5,-0.5 + z,  -0.5,-0.5,-0.5 + z,  -0.5,-0.5, 0.5 + z,
+        -0.5, 0.5, 0.5 + z,  -0.5, 0.5,-0.5 + z,   0.5, 0.5, 0.5 + z,
+         0.5, 0.5,-0.5 + z,  -0.5, 0.5,-0.5 + z,  -0.5, 0.5, 0.5 + z
       ],
       indices = [
          0, 1, 2,   0, 2, 3,
@@ -110,9 +112,13 @@
       .shaderProgram(shaderProgram)
       .vertexAttrib('position', vbo, 9*8, gl.FLOAT, 3, false, 0, 0)
       .vertexElem(ibo, 6*6, gl.UNSIGNED_SHORT, 0)
-      .uniform('view', gl.setMatrix4Ortho(-1.0, 1.0, -1.0, 1.0, 0.1, 100.0))
+      .uniform('view', gl.setMatrix4LookAt([10.0,10.0,10.0], [0.0,0.0,0.0], [0.0,1.0,0.0]))
+      .uniform('projection', gl.setMatrix4Ortho(-1.0, 1.0, -1.0, 1.0, 0.1, 100.0))
       .triangles()
       .render(context);
+      
+      //console.log(gl.setMatrix4LookAt([10.0,10.0,10.0], [0.0,0.0,0.0], [0.0,1.0,0.0]));
+      //console.log(gl.setMatrix4Ortho(-1.0, 1.0, -1.0, 1.0, 0.1, 100.0));
       //*/
 
       /* TEST: Draw the scene manually (for comparison)
