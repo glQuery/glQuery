@@ -45,7 +45,7 @@
           return function callback() {
             self.ctx.clear(self.clearMask);
             gl(self.rootId).render(self.ctx);
-            self.nextFrame = gl.requestAnimationFrame(callback, self.ctx.canvas);
+            self.nextFrame = window.requestAnimationFrame(callback, self.ctx.canvas);
           };
         }
       };
@@ -55,7 +55,7 @@
           if (rootId != null) {
             if (!assertType(rootId, 'string', 'canvas.start', 'rootId')) return this;
             self.rootId = rootId;
-            self.nextFrame = gl.requestAnimationFrame(self.callback(), self.ctx.canvas);
+            self.nextFrame = window.requestAnimationFrame(self.callback(), self.ctx.canvas);
           }
           return this;
         },
