@@ -108,7 +108,7 @@
   };
 
   // Cross-browser initialization
-  window.requestAnimationFrame = (function(){
+  gl.requestAnimationFrame = (function(){
     return window.requestAnimationFrame
         || window.webkitRequestAnimationFrame
         || window.mozRequestAnimationFrame
@@ -117,7 +117,7 @@
         || function(callback, element){ window.setTimeout(callback, 1000 / 60); };
   })();
 
-  window.cancelRequestAnimationFrame = (function(){
+  gl.cancelRequestAnimationFrame = (function(){
     return window.cancelRequestAnimationFrame
         || window.webkitCancelRequestAnimationFrame
         || window.mozCancelRequestAnimationFrame
