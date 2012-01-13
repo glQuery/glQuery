@@ -18,7 +18,7 @@
   // Counters for identifiers
   shaderProgramCounter = 0,
   // Logging / information methods
-  logDebug = function(msg) { console.log(msg); },
+  logDebug = function(msg) { /*console.log(msg);*/ },
   logInfo = function(msg) { console.log(msg); },
   logWarning = function(msg) { console.warn(msg); },
   logError = function(msg) { console.error(msg); },
