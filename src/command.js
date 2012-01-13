@@ -324,6 +324,7 @@
       commandArgs = c[2];
       commandDispatch[key](context, selector, commandArgs);
     }
+    commands.length = 0;
   },
   // Collect and execute webgl commands using a render state structure to keep track of state changes
   evalCommands = function(context, renderState, commandsStack) {
