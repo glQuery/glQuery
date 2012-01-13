@@ -26,7 +26,7 @@ var glQuery = (function() {
   // Counters for identifiers
   shaderProgramCounter = 0,
   // Logging / information methods
-  logDebug = function(msg) { console.log(msg); },
+  logDebug = function(msg) { /*console.log(msg);*/ },
   logInfo = function(msg) { console.log(msg); },
   logWarning = function(msg) { console.warn(msg); },
   logError = function(msg) { console.error(msg); },
@@ -587,6 +587,10 @@ var glQuery = (function() {
   gl.BROWSER_DEFAULT_WEBGL          = 0x9244;
 
 
+  gl.update = function() {
+    return commands.length > 0;
+  };
+
   // Utility functions for working with tags
   // Test whether t0 contains any of the tags in ts1
   var containsAnyTags = function(t0, ts1) {
@@ -1056,6 +1060,7 @@ var glQuery = (function() {
       commandArgs = c[2];
       commandDispatch[key](context, selector, commandArgs);
     }
+    commands.length = 0;
   },
   // Collect and execute webgl commands using a render state structure to keep track of state changes
   evalCommands = function(context, renderState, commandsStack) {
