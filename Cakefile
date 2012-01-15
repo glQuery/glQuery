@@ -8,6 +8,7 @@ libFiles  = [
   'core'
   'webgl-constants'
   'update'
+  'refresh'
   'tag'
   'state'
   'command'
