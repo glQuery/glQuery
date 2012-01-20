@@ -112,13 +112,13 @@
       .shaderProgram(shaderProgram)
       .vertexAttrib('position', vbo, 9*8, gl.FLOAT, 3, false, 0, 0)
       .vertexElem(ibo, 6*6, gl.UNSIGNED_SHORT, 0)
-      .uniform('view', gl.setMatrix4LookAt([10.0,10.0,10.0], [0.0,0.0,0.0], [0.0,1.0,0.0]))
-      .uniform('projection', gl.setMatrix4Ortho(-1.0, 1.0, -1.0, 1.0, 0.1, 100.0))
+      .uniform('view', gl.matrix4.newLookAt([10.0,10.0,10.0], [0.0,0.0,0.0], [0.0,1.0,0.0]))
+      .uniform('projection', gl.matrix4.newOrtho(-1.0, 1.0, -1.0, 1.0, 0.1, 100.0))
       .triangles()
       .render(context);
       
-      //console.log(gl.setMatrix4LookAt([10.0,10.0,10.0], [0.0,0.0,0.0], [0.0,1.0,0.0]));
-      //console.log(gl.setMatrix4Ortho(-1.0, 1.0, -1.0, 1.0, 0.1, 100.0));
+      //console.log(gl.matrix4.newLookAt([10.0,10.0,10.0], [0.0,0.0,0.0], [0.0,1.0,0.0]));
+      //console.log(gl.matrix4.newOrtho(-1.0, 1.0, -1.0, 1.0, 0.1, 100.0));
       //*/
 
       /* TEST: Draw the scene manually (for comparison)
@@ -130,8 +130,8 @@
       context.bindBuffer(context.ARRAY_BUFFER, vbo);
       context.vertexAttribPointer(vboAttribLocation, 3, context.FLOAT, false, 0, 0);
       context.bindBuffer(context.ELEMENT_ARRAY_BUFFER, ibo);
-      context.uniformMatrix4fv(viewUniformLocation, false, glQueryMath.setMatrix4LookAt([10.0,10.0,10.0], [0.0,0.0,0.0], [0.0,1.0,0.0]));
-      context.uniformMatrix4fv(projectionUniformLocation, false, glQueryMath.setMatrix4Ortho(-1.0, 1.0, -1.0, 1.0, 0.1, 100.0));
+      context.uniformMatrix4fv(viewUniformLocation, false, glQueryMath.matrix4.newLookAt([10.0,10.0,10.0], [0.0,0.0,0.0], [0.0,1.0,0.0]));
+      context.uniformMatrix4fv(projectionUniformLocation, false, glQueryMath.matrix4.newOrtho(-1.0, 1.0, -1.0, 1.0, 0.1, 100.0));
       context.drawElements(context.TRIANGLES, 6*6, context.UNSIGNED_SHORT, 0);
       //*/
     };
