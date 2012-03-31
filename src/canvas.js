@@ -28,10 +28,25 @@
       logInfo("Initialized canvas: " + canvasId);
     else
       logInfo("Initialized canvas");
+
     // Initialize the WebGL context
     var canvasCtx = canvasEl.getContext('experimental-webgl', contextAttr);
     if (!assert(canvasCtx != null, "Could not get a 'experimental-webgl' context."))
       return dummy;
+
+    canvasEl.addEventListener("webglcontextlost", function(event) {
+        var i;
+        for (i = 0; i < eventCallbacks.contextlost.length; ++i)
+          eventCallbacks.contextlost[i]();
+        event.preventDefault();
+      }, false);
+
+    canvasEl.addEventListener("webglcontextrestored", function(event) {
+        var i;
+        // TODO: reload managed webgl resources
+        for (i = 0; i < eventCallbacks.contextrestored.length; ++i)
+          eventCallbacks.contextrestored[i]();
+      }, false);
 
     // Wrap glQuery canvas
     return (function() { 

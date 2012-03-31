@@ -16,6 +16,7 @@ libFiles  = [
   'canvas'
   'scene'
   'shader'
+  'contextevents'
   'worker'
   'footer'
 ]

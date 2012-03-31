@@ -17,6 +17,8 @@
   shaderLocations = {},
   // Counters for identifiers
   shaderProgramCounter = 0,
+  // Event callbacks
+  eventCallbacks = { contextlost: [], contextrestored: [] },
   // Logging / information methods
   logDebug = function(msg) { /*console.log(msg);*/ },
   logInfo = function(msg) { console.log(msg); },
