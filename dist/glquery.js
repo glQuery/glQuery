@@ -1319,11 +1319,12 @@ var glQuery = (function() {
       // gl.canvas(...).start().
       for (i = 0; i < contexts.length; ++i) {
         var context = contexts[i];
+        if (context.ctx.canvas !== canvasEl)
+          continue;
         if (context.nextFrame != null)
           window.cancelAnimationFrame(context.nextFrame);
+        break;
       }
-      // Add context to the global list
-      contexts.push(self);
       // Prevent default handling of event
       event.preventDefault();
     }, false);
@@ -1337,8 +1338,11 @@ var glQuery = (function() {
       // via gl.canvas(...).pause().
       for (i = 0; i < contexts.length; ++i) {
         var context = contexts[i];
+        if (context.ctx.canvas !== canvasEl)
+          continue;
         if (context.nextFrame == null && context.paused === false)
-          window.requestAnimationFrame(context.callback(), self.ctx.canvas);
+          window.requestAnimationFrame(context.callback(), context.ctx.canvas);
+        break;
       }
     }, false);
 
@@ -1353,6 +1357,8 @@ var glQuery = (function() {
         callback: function() {
           self = this;
           return function callback() {
+            if (self.ctx.isContextLost())
+              return; // Ensure context lost
             self.ctx.clear(self.clearMask);
             gl(self.rootId).render(self.ctx);
             self.nextFrame = window.requestAnimationFrame(callback, self.ctx.canvas);
