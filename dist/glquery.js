@@ -1316,23 +1316,11 @@ var glQuery = (function() {
       for (i = 0; i < eventCallbacks.contextlost.length; ++i)
         eventCallbacks.contextlost[i]();
       // Cancel rendering on all canvases that use request animation frame via
-      // gl.canvas(...).start(). Rendering will be resume again on the
-      // contextrestore event if rendering is not already explicitly paused via
-      // gl.canvas(...).pause().
+      // gl.canvas(...).start().
       for (i = 0; i < contexts.length; ++i) {
         var context = contexts[i];
-        /* TODO...
         if (context.nextFrame != null)
-          nextFrame: null,
-          clearMask: gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT,
-          callback: function() {
-            self = this;
-            return function callback() {
-              self.ctx.clear(self.clearMask);
-              gl(self.rootId).render(self.ctx);
-              self.nextFrame = window.requestAnimationFrame(callback, self.ctx.canvas);
-            };
-        }*/
+          window.cancelAnimationFrame(context.nextFrame);
       }
       // Add context to the global list
       contexts.push(self);
@@ -1345,6 +1333,13 @@ var glQuery = (function() {
       // TODO: reload managed webgl resources
       for (i = 0; i < eventCallbacks.contextrestored.length; ++i)
         eventCallbacks.contextrestored[i]();
+      // Resume rendering on all contexts that have not explicitly been paused
+      // via gl.canvas(...).pause().
+      for (i = 0; i < contexts.length; ++i) {
+        var context = contexts[i];
+        if (context.nextFrame == null && context.paused === false)
+          window.requestAnimationFrame(context.callback(), self.ctx.canvas);
+      }
     }, false);
 
     // Wrap glQuery canvas
@@ -1353,7 +1348,7 @@ var glQuery = (function() {
         ctx: canvasCtx,
         rootId: null,
         nextFrame: null,
-        paused: false,
+        paused: true,
         clearMask: gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT,
         callback: function() {
           self = this;
