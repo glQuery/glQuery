@@ -17,6 +17,8 @@
   shaderLocations = {},
   // Counters for identifiers
   shaderProgramCounter = 0,
+  // WebGL contexts
+  contexts = [],
   // Event callbacks
   eventCallbacks = { contextlost: [], contextrestored: [] },
   // Logging / information methods
