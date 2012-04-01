@@ -28,7 +28,11 @@ var glQuery = (function() {
   // WebGL contexts
   contexts = [],
   // Event callbacks
-  eventCallbacks = { contextlost: [], contextrestored: [] },
+  eventCallbacks = { 
+    contextlost: [], 
+    contextrestored: [], 
+    contextcreationerror: [] 
+  },
   // Logging / information methods
   logDebug = function(msg) { /*console.log(msg);*/ },
   logInfo = function(msg) { console.log(msg); },
@@ -1275,6 +1279,12 @@ var glQuery = (function() {
   };
 
 
+  var triggerContextEvents = function(callbacks, event) {
+    for (var i = 0; i < callbacks.length; ++i)
+      if (callbacks[i][1])
+        callbacks[i][0](event);
+  };
+
   // Initialize a WebGL canvas
   gl.canvas = function(htmlCanvas, contextAttr, width, height) {
     var canvasId, canvasEl;
@@ -1313,8 +1323,8 @@ var glQuery = (function() {
 
     canvasEl.addEventListener("webglcontextlost", function(event) {
       var i;
-      for (i = 0; i < eventCallbacks.contextlost.length; ++i)
-        eventCallbacks.contextlost[i]();
+      // Trigger user events
+      triggerContextEvents(eventCallbacks.contextlost, event);
       // Cancel rendering on all canvases that use request animation frame via
       // gl.canvas(...).start().
       for (i = 0; i < contexts.length; ++i) {
@@ -1332,8 +1342,8 @@ var glQuery = (function() {
     canvasEl.addEventListener("webglcontextrestored", function(event) {
       var i;
       // TODO: reload managed webgl resources
-      for (i = 0; i < eventCallbacks.contextrestored.length; ++i)
-        eventCallbacks.contextrestored[i]();
+      // Trigger user events
+      triggerContextEvents(eventCallbacks.contextrestored, event);
       // Resume rendering on all contexts that have not explicitly been paused
       // via gl.canvas(...).pause().
       for (i = 0; i < contexts.length; ++i) {
@@ -1344,6 +1354,10 @@ var glQuery = (function() {
           window.requestAnimationFrame(context.callback(), context.ctx.canvas);
         break;
       }
+    }, false);
+
+    canvasEl.addEventListener("webglcontextcreationerror", function(event) {
+      triggerContextEvents(eventCallbacks.contextcreationerror, event);
     }, false);
 
     // Wrap glQuery canvas
@@ -1477,38 +1491,29 @@ var glQuery = (function() {
     return gl;
   };
 
-  gl.contextlost = function(callback) {
+  var registerContextEvent = function(eventName, callback, active) {
     var i;
     // Clear the list of callbacks if nothing was passed in
     if(typeof callback === 'undefined') {
-      eventCallbacks.contextlost = [];
+      eventCallbacks[eventName] = [];
       return;
     }
-    // Check that callback is a function
-    assertType(callback, 'function', 'contextlost', 'callback');
+    // Check that callback is a function and active is a boolean
+    assertType(callback, 'function', eventName, 'callback');
+    typeof active !== 'undefined' && assertType(active, 'boolean', eventName, 'active');
     // Prevent the same callback from being added to the list twice.
-    for (i = 0; i < eventCallbacks.contextlost.length; ++i)
-      if (eventCallbacks.contextlost[i] === callback)
+    for (i = 0; i < eventCallbacks[eventName].length; ++i)
+      if (eventCallbacks[eventName][i][0] === callback) {
+        eventCallbacks[eventName][i][1] = (typeof active === 'boolean'? active : true);
         return;
+      }
     // Add the callback
-    eventCallbacks.contextlost.push(callback);
+    eventCallbacks[eventName].push([callback, active]);
   };
-  gl.contextrestored = function(callback) {
-    var i;
-    // Clear the list of callbacks if nothing was passed in
-    if(typeof callback === 'undefined') {
-      eventCallbacks.contextrestored = [];
-      return;
-    }
-    // Check that callback is a function
-    assertType(callback, 'function', 'contextrestored', 'callback');
-    // Prevent the same callback from being added to the list twice.
-    for (i = 0; i < eventCallbacks.contextrestored.length; ++i)
-      if (eventCallbacks.contextrestored[i] === callback)
-        return;
-    // Add the callback
-    eventCallbacks.contextrestored.push(callback);
-  };
+  
+  gl.contextlost = function(callback, active) { registerContextEvent('contextlost',callback,active); };
+  gl.contextrestored = function(callback, active) { registerContextEvent('contextrestored',callback,active); };
+  gl.contextcreationerror = function(callback) { registerContextEvent('contextcreationerror',callback,active); };
 
 
   gl.worker = function(workerId, js) {

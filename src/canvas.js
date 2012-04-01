@@ -1,3 +1,9 @@
+  var triggerContextEvents = function(callbacks, event) {
+    for (var i = 0; i < callbacks.length; ++i)
+      if (callbacks[i][1])
+        callbacks[i][0](event);
+  };
+
   // Initialize a WebGL canvas
   gl.canvas = function(htmlCanvas, contextAttr, width, height) {
     var canvasId, canvasEl;
@@ -36,8 +42,8 @@
 
     canvasEl.addEventListener("webglcontextlost", function(event) {
       var i;
-      for (i = 0; i < eventCallbacks.contextlost.length; ++i)
-        eventCallbacks.contextlost[i]();
+      // Trigger user events
+      triggerContextEvents(eventCallbacks.contextlost, event);
       // Cancel rendering on all canvases that use request animation frame via
       // gl.canvas(...).start().
       for (i = 0; i < contexts.length; ++i) {
@@ -55,8 +61,8 @@
     canvasEl.addEventListener("webglcontextrestored", function(event) {
       var i;
       // TODO: reload managed webgl resources
-      for (i = 0; i < eventCallbacks.contextrestored.length; ++i)
-        eventCallbacks.contextrestored[i]();
+      // Trigger user events
+      triggerContextEvents(eventCallbacks.contextrestored, event);
       // Resume rendering on all contexts that have not explicitly been paused
       // via gl.canvas(...).pause().
       for (i = 0; i < contexts.length; ++i) {
@@ -67,6 +73,10 @@
           window.requestAnimationFrame(context.callback(), context.ctx.canvas);
         break;
       }
+    }, false);
+
+    canvasEl.addEventListener("webglcontextcreationerror", function(event) {
+      triggerContextEvents(eventCallbacks.contextcreationerror, event);
     }, false);
 
     // Wrap glQuery canvas

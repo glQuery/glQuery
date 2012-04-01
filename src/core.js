@@ -20,7 +20,11 @@
   // WebGL contexts
   contexts = [],
   // Event callbacks
-  eventCallbacks = { contextlost: [], contextrestored: [] },
+  eventCallbacks = { 
+    contextlost: [], 
+    contextrestored: [], 
+    contextcreationerror: [] 
+  },
   // Logging / information methods
   logDebug = function(msg) { /*console.log(msg);*/ },
   logInfo = function(msg) { console.log(msg); },

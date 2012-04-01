@@ -1,33 +1,24 @@
-  gl.contextlost = function(callback) {
+  var registerContextEvent = function(eventName, callback, active) {
     var i;
     // Clear the list of callbacks if nothing was passed in
     if(typeof callback === 'undefined') {
-      eventCallbacks.contextlost = [];
+      eventCallbacks[eventName] = [];
       return;
     }
-    // Check that callback is a function
-    assertType(callback, 'function', 'contextlost', 'callback');
+    // Check that callback is a function and active is a boolean
+    assertType(callback, 'function', eventName, 'callback');
+    typeof active !== 'undefined' && assertType(active, 'boolean', eventName, 'active');
     // Prevent the same callback from being added to the list twice.
-    for (i = 0; i < eventCallbacks.contextlost.length; ++i)
-      if (eventCallbacks.contextlost[i] === callback)
+    for (i = 0; i < eventCallbacks[eventName].length; ++i)
+      if (eventCallbacks[eventName][i][0] === callback) {
+        eventCallbacks[eventName][i][1] = (typeof active === 'boolean'? active : true);
         return;
+      }
     // Add the callback
-    eventCallbacks.contextlost.push(callback);
+    eventCallbacks[eventName].push([callback, active]);
   };
-  gl.contextrestored = function(callback) {
-    var i;
-    // Clear the list of callbacks if nothing was passed in
-    if(typeof callback === 'undefined') {
-      eventCallbacks.contextrestored = [];
-      return;
-    }
-    // Check that callback is a function
-    assertType(callback, 'function', 'contextrestored', 'callback');
-    // Prevent the same callback from being added to the list twice.
-    for (i = 0; i < eventCallbacks.contextrestored.length; ++i)
-      if (eventCallbacks.contextrestored[i] === callback)
-        return;
-    // Add the callback
-    eventCallbacks.contextrestored.push(callback);
-  };
+  
+  gl.contextlost = function(callback, active) { registerContextEvent('contextlost',callback,active); };
+  gl.contextrestored = function(callback, active) { registerContextEvent('contextrestored',callback,active); };
+  gl.contextcreationerror = function(callback) { registerContextEvent('contextcreationerror',callback,active); };
 
