@@ -91,7 +91,7 @@
           self = this;
           return function callback() {
             if (self.ctx.isContextLost())
-              return; // Ensure context lost
+              return; // Ensure rendering does not continue if context is lost
             self.ctx.clear(self.clearMask);
             gl(self.rootId).render(self.ctx);
             self.nextFrame = window.requestAnimationFrame(callback, self.ctx.canvas);
