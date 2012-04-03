@@ -13,11 +13,8 @@ libFiles  = [
   'state'
   'command'
   'api'
-  'canvas'
   'scene'
   'shader'
-  'contextevents'
-  'worker'
   'footer'
 ]
 
