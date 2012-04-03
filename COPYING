@@ -34,7 +34,6 @@ Other Information:
   * When using or citing the work, you should not imply endorsement by the
     author or the affirmer.
 
-
 MAKING MODIFICATIONS
 --------------------
 
@@ -51,4 +50,14 @@ fully released into the public domain.
 (This obviously does not extend to external plugins. Feel free to create
 plugins using any open source license of your choosing! If it's well written
 and generally useful we'll even offer to add it to https://github.com/glQuery)
+
+THIRD PARTY SOFTWARE
+--------------------
+
+The following third party packages are included in this source repository for
+testing purposes. These are not included in any of the distribution files under
+the dist/ directory. Their individual licenses can be found under the licenses/
+directory.
+
+* [support/webgl-debug](https://cvs.khronos.org/svn/repos/registry/trunk/public/webgl/sdk/debug/webgl-debug.js) - [New (3-clause) BSD License](http://www.opensource.org/licenses/BSD-3-Clause)
 
