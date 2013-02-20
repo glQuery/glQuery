@@ -2,6 +2,7 @@
   var gl = function(selector) {
     return gl.fn.init(selector);
   },
+  debugLevel = 0,
   // The scenes, each of which contains a hierarchy of identifiers
   scenes = {},
   // Commands to be executed
@@ -26,11 +27,13 @@
     contextcreationerror: [] 
   },
   // Logging / information methods
-  logDebug = function(msg) { /*console.log(msg);*/ },
-  logInfo = function(msg) { console.log(msg); },
-  logWarning = function(msg) { console.warn(msg); },
-  logError = function(msg) { console.error(msg); },
-  logApiError = function(func,msg) { console.error("In call to '" + func + "', " + msg); },
+  logDebug = ((!(debugLevel > 0))? function(){} :
+    (debugLevel === 1)? function(msg) { console.debug("glQuery:", msg); } :
+    function() { console.debug.apply(console, ["glQuery:"].concat(Array.prototype.slice.call(arguments))); }),
+  logInfo = function(msg) { console.log("glQuery:", msg); },
+  logWarning = function(msg) { console.warn("glQuery:", msg); },
+  logError = function(msg) { console.error("glQuery:", msg); },
+  logApiError = function(func,msg) { console.error("glQuery:", "In call to '" + func + "', " + msg); },
   // Run-time checks
   // TODO: Should we provide checks that throw exceptions rather than logging messages?
   assert = function(condition, msg) { if (!condition) logError(msg); return condition; },
