@@ -215,10 +215,12 @@
     // geometry: 1
     function(context, renderState, args) {
       logDebug("eval command: geometry", context, renderState, args);
-      if (renderState.useElements)
-        context.drawElements(args[0], args[1] != null? args[1] : renderState.numVertices, renderState.elementsType, renderState.elementsOffset + (args[2] != null? args[2] : 0));
-      else
-        context.drawArrays(args[0], args[2] != null? args[2] : 0, args[1] != null? args[1] : renderState.numVertices);
+      if (renderState.shaderProgram) {
+        if (renderState.useElements)
+          context.drawElements(args[0], args[1] != null? args[1] : renderState.numVertices, renderState.elementsType, renderState.elementsOffset + (args[2] != null? args[2] : 0));
+        else
+          context.drawArrays(args[0], args[2] != null? args[2] : 0, args[1] != null? args[1] : renderState.numVertices);
+      }
     },
     // vertexElem: 2
     function(context, renderState, args) {

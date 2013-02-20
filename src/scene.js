@@ -50,4 +50,3 @@
     }
     return gl.fn.init.apply(gl.fn, rootIds);
   };
-
