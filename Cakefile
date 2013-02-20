@@ -64,7 +64,7 @@ task 'fetch:extra-modules', "Fetch additional glquery modules that are useful", 
 task 'minify', "Minify the resulting application file after build", ->
   path.exists 'node_modules/.bin/uglifyjs', (exists) ->
     if exists
-      exec "node_modules/.bin/uglifyjs dist/glquery.js > dist/glquery.min.js", (err, stdout, stderr) ->
+      exec "node_modules/.bin/uglifyjs dist/glquery.js --comments /publicdomain/ > dist/glquery.min.js", (err, stdout, stderr) ->
         throw err if err
         console.log stdout + stderr
         console.log "...Done(minify)"
