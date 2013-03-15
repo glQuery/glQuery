@@ -44,6 +44,10 @@ libFiles =
     'contextevents'
     'worker'
     'footer']
+  '2.0-lite': baseLibFiles.concat [
+    'canvas'
+    'contextevents'
+    'footer']
 
 concatSrcFiles = (files, callback) ->
   contents = new Array files.length
