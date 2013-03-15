@@ -21,7 +21,7 @@
   // WebGL contexts
   contexts = [],
   // Event callbacks
-  eventCallbacks = { 
+  eventFns = { 
     contextlost: [], 
     contextrestored: [], 
     contextcreationerror: [] 
@@ -125,7 +125,7 @@
         || window.mozRequestAnimationFrame
         || window.oRequestAnimationFrame
         || window.msRequestAnimationFrame
-        || function(callback, element){ window.setTimeout(callback, 1000 / 60); };
+        || function(fn, element){ window.setTimeout(fn, 1000 / 60); };
   })();
 
   window.cancelRequestAnimationFrame = (function(){

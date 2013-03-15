@@ -1,7 +1,7 @@
-  var triggerContextEvents = function(callbacks, event) {
-    for (var i = 0; i < callbacks.length; ++i)
-      if (callbacks[i][1])
-        callbacks[i][0](event);
+  var triggerContextEvents = function(fns, event) {
+    for (var i = 0; i < fns.length; ++i)
+      if (fns[i][1])
+        fns[i][0](event);
   };
 
   // Initialize a WebGL canvas
@@ -43,7 +43,7 @@
     canvasEl.addEventListener("webglcontextlost", function(event) {
       var i;
       // Trigger user events
-      triggerContextEvents(eventCallbacks.contextlost, event);
+      triggerContextEvents(eventFns.contextlost, event);
       // Cancel rendering on all canvases that use request animation frame via
       // gl.canvas(...).start().
       for (i = 0; i < contexts.length; ++i) {
@@ -62,7 +62,7 @@
       var i;
       // TODO: reload managed webgl resources
       // Trigger user events
-      triggerContextEvents(eventCallbacks.contextrestored, event);
+      triggerContextEvents(eventFns.contextrestored, event);
       // Resume rendering on all contexts that have not explicitly been paused
       // via gl.canvas(...).pause().
       for (i = 0; i < contexts.length; ++i) {
@@ -70,13 +70,13 @@
         if (context.ctx.canvas !== canvasEl)
           continue;
         if (context.nextFrame == null && context.paused === false)
-          window.requestAnimationFrame(context.callback(), context.ctx.canvas);
+          window.requestAnimationFrame(context.fn(), context.ctx.canvas);
         break;
       }
     }, false);
 
     canvasEl.addEventListener("webglcontextcreationerror", function(event) {
-      triggerContextEvents(eventCallbacks.contextcreationerror, event);
+      triggerContextEvents(eventFns.contextcreationerror, event);
     }, false);
 
     // Wrap glQuery canvas
@@ -87,14 +87,14 @@
         nextFrame: null,
         paused: true,
         clearMask: gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT,
-        callback: function() {
+        fn: function() {
           self = this;
-          return function callback() {
+          return function fn() {
             if (self.ctx.isContextLost())
               return; // Ensure rendering does not continue if context is lost
             self.ctx.clear(self.clearMask);
             gl(self.rootId).render(self.ctx);
-            self.nextFrame = window.requestAnimationFrame(callback, self.ctx.canvas);
+            self.nextFrame = window.requestAnimationFrame(fn, self.ctx.canvas);
           };
         }
       };
@@ -107,7 +107,7 @@
           if (rootId != null) {
             if (!assertType(rootId, 'string', 'canvas.start', 'rootId')) return this;
             self.rootId = rootId;
-            self.nextFrame = window.requestAnimationFrame(self.callback(), self.ctx.canvas);
+            self.nextFrame = window.requestAnimationFrame(self.fn(), self.ctx.canvas);
             self.paused = false;
           }
           return this;
