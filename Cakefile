@@ -2,39 +2,76 @@ fs     = require 'fs'
 path   = require 'path'
 {exec} = require 'child_process'
 
-libFiles  = [
-  # omit src/ and .js to make the below lines a little shorter
+# Constants
+masterVersion = '2.0'
+
+# omit src/ and .js to make the below lines a little shorter
+baseLibFiles = [
   'header'
   'core'
   'webgl-constants'
   'update'
-  'refresh'
-  'tag'
-  'state'
-  'command'
-  'api'
-  'canvas'
-  'scene'
-  'shader'
-  'contextevents'
-  'worker'
-  'footer'
 ]
+
+libFiles = 
+  '1.0': baseLibFiles.concat [
+    'refresh'
+    'tag'
+    'state'
+    'command'
+    'api'
+    'scene'
+    'shader'
+    'footer']
+  '1.1': baseLibFiles.concat [
+    'refresh'
+    'tag'
+    'state'
+    'command'
+    'api'
+    'scene'
+    'shader'
+    'footer']
+  '2.0': baseLibFiles.concat [
+    'refresh'
+    'tag'
+    'state'
+    'command'
+    'api'
+    'canvas'
+    'scene'
+    'shader'
+    'contextevents'
+    'worker'
+    'footer']
+
+concatSrcFiles = (files, callback) ->
+  contents = new Array files.length
+  remaining = files.length
+  for file, index in files then do (file, index) ->
+    fs.readFile "src/#{file}.js", 'utf8', (err, fileContents) ->
+      throw err if err
+      contents[index] = fileContents
+      (callback contents) if --remaining is 0 and callback?
 
 task 'build', "Concatenate source files into a single library file", ->
   exec "mkdir -p 'build'", (err, stdout, stderr) ->
-  # Concatenate files
-  libContents = new Array remaining = libFiles.length
-  for file, index in libFiles then do (file, index) ->
-    fs.readFile "src/#{file}.js", 'utf8', (err, fileContents) ->
-      throw err if err
-      libContents[index] = fileContents
-      process() if --remaining is 0
   # Translate concatenated file
-  process = ->
-    fs.writeFile 'dist/glquery.js', libContents.join('\n'), 'utf8', (err) ->
+  output = (version) -> (contents) ->
+    distFileName = "dist/glquery-#{version}.js"
+    fs.writeFile distFileName, (contents.join '\n'), 'utf8', (err) ->
       throw err if err
-      console.log "...Done(dist/glquery.js)"
+      console.log "...Done(#{distFileName})"
+      if version == masterVersion
+        ((fs.createReadStream distFileName).pipe fs.createWriteStream 'dist/glquery.js').on "close", ->
+          console.log "...Done(dist/glquery.js)"
+          return
+      return
+    return
+  # Concatenate files
+  for version, files of libFiles
+    concatSrcFiles files, output version
+  return
 
 task 'fetch:npm', "Fetch the npm package manager", ->
   exec "curl http://npmjs.org/install.sh | sudo sh", (err, stdout, stderr) ->
