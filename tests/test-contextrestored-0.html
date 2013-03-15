@@ -141,24 +141,41 @@
       //*/
 
       // Event bindings
+      debugCanvas.addEventListener("webglcontextlost", function(event){
+          console.info("webglcontextlost", event);
+          document.getElementById('contextlost').textContent = String(context.isContextLost());
+          event.preventDefault();
+          // Try to render
+          console.info("Render (context lost)...");
+          context.clear(context.COLOR_BUFFER_BIT | context.DEPTH_BUFFER_BIT);
+          gl('main').render(context);
+        }, false);
+      debugCanvas.addEventListener("webglcontextrestored", function(event){
+          console.info("webglcontextrestored", event);
+          document.getElementById('contextrestored').textContent = String(!context.isContextLost());
+          // Try to render
+          console.info("Render (context restored)...");
+          context.clear(context.COLOR_BUFFER_BIT | context.DEPTH_BUFFER_BIT);
+          gl('main').render(context);
+        }, false);
+
       document.getElementById('losecontext').onclick = function(){ 
         console.debug("Lose context...");
+        document.getElementById('contextlost').innerHTML = "&nbsp;-&nbsp;";
+        document.getElementById('contextrestored').innerHTML = "&nbsp;-&nbsp;";
         debugCanvas.loseContext();
-        /* TODO: on contextlost:
-          document.getElementById('contextlost').textContent = String(context.isContextLost());
-        */
+      };
+
+      document.getElementById('restorecontext').onclick = function(){ 
+        console.info("Restore context...");
+        document.getElementById('contextrestored').innerHTML = "&nbsp;-&nbsp;";
         debugCanvas.restoreContext();
-        /* TODO: on contextrestored:
-          document.getElementById('contextrestored').textContent = String(!context.isContextLost());
-        */
-        context.clear(context.COLOR_BUFFER_BIT | context.DEPTH_BUFFER_BIT);
-        gl('main').render(context);
       };
     };
   </script>
   <p>
     You should see a white cube rendered over a black background.
-    Push this button to force a context lost event and observe whether the cube restored: <button id="losecontext">lose context</button>
+    Push this button to force a context lost event and observe whether the cube restored: <button id="losecontext">lose context</button> <button id="restorecontext">restore context</button>
   </p>
   <p>Context lost: <span id="contextlost" class="var"></span> (should be true)</p>
   <p>Context restored: <span id="contextrestored" class="var"></span> (should be true)</p>
