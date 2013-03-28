@@ -1334,7 +1334,7 @@ var glQuery = (function() {
       // gl.canvas(...).start().
       for (i = 0; i < contexts.length; ++i) {
         var context = contexts[i];
-        if (context.ctx.canvas !== canvasEl)
+        if (context.glContext.canvas !== canvasEl)
           continue;
         if (context.nextFrame != null)
           window.cancelAnimationFrame(context.nextFrame);
@@ -1349,14 +1349,14 @@ var glQuery = (function() {
       // TODO: reload managed webgl resources
       // Trigger user events
       triggerContextEvents(eventFns.contextrestored, event);
-      // Resume rendering on all contexts that have not explicitly been paused
-      // via gl.canvas(...).pause().
+      // Resume rendering on all contexts that have not explicitly been suspended
+      // via gl.canvas(...).suspend().
       for (i = 0; i < contexts.length; ++i) {
         var context = contexts[i];
-        if (context.ctx.canvas !== canvasEl)
+        if (context.glContext.canvas !== canvasEl)
           continue;
-        if (context.nextFrame == null && context.paused === false)
-          window.requestAnimationFrame(context.fn(), context.ctx.canvas);
+        if (context.nextFrame == null && context.suspended === false)
+          window.requestAnimationFrame(context.fn(), context.glContext.canvas);
         break;
       }
     }, false);
@@ -1366,43 +1366,44 @@ var glQuery = (function() {
     }, false);
 
     // Wrap glQuery canvas
-    return (function() { 
+    extAPI = {};
+    canvasFn = (function() { 
       var self = { // Private
-        ctx: canvasCtx,
+        glContext: canvasCtx,
         rootId: null,
         nextFrame: null,
-        paused: true,
+        suspended: true,
         clearMask: gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT,
-        fn: function() {
+        fnLoop: function() {
           self = this;
-          return function fn() {
-            if (self.ctx.isContextLost())
+          return function fnLoop() {
+            if (self.glContext.isContextLost())
               return; // Ensure rendering does not continue if context is lost
-            self.ctx.clear(self.clearMask);
-            gl(self.rootId).render(self.ctx);
-            self.nextFrame = window.requestAnimationFrame(fn, self.ctx.canvas);
+            self.glContext.clear(self.clearMask);
+            gl(self.rootId).render(self.glContext);
+            self.nextFrame = window.requestAnimationFrame(fn, self.glContext.canvas);
           };
         }
       };
       // Add context to the global list
       contexts.push(self);
       // Provide context canvas api
-      return { // Public
+      api = { // Public
         start: function(rootId) {
           logDebug("canvas.start");
           if (rootId != null) {
             if (!assertType(rootId, 'string', 'canvas.start', 'rootId')) return this;
             self.rootId = rootId;
-            self.nextFrame = window.requestAnimationFrame(self.fn(), self.ctx.canvas);
-            self.paused = false;
+            self.nextFrame = window.requestAnimationFrame(self.fnLoop(), self.glContext.canvas);
+            self.suspended = false;
           }
           return this;
         },
-        pause: function() {
-          logDebug("canvas.pause");
-          window.cancelAnimationFrame(self.nextFrame);
+        suspend: function() {
+          logDebug("canvas.suspend");
+          window.cancelAnimationFrame(self.suspend);
           self.nextFrame = null;
-          self.paused = true;
+          self.suspended = true;
           return this;
         },
         clear: function(mask) {
@@ -1412,21 +1413,33 @@ var glQuery = (function() {
         },
         clearColor: function(r,g,b,a) {
           logDebug("canvas.clearColor");
-          self.ctx.clearColor(r,g,b,a);
+          self.glContext.clearColor(r,g,b,a);
           return this;
         },
         clearDepth: function(d) {
           logDebug("canvas.clearDepth");
-          self.ctx.clearDepth(d);
+          self.glContext.clearDepth(d);
           return this;
         },
         clearStencil: function(s) {
           logDebug("canvas.clearStencil");
-          self.ctx.clearStencil(s);
+          self.glContext.clearStencil(s);
           return this;
         }
       };
+      for (k in extAPI)
+        if (!(k in api)) // Don't override the base api
+          api[k] = extAPI[k](self);
+      return api;
     })();
+    canvasFn.extend = function(name, fn) {
+      logDebug("canvas.extend (" + name + ")");
+      if (!assertType(name, 'string', 'canvas.extend', 'name')) return this;
+      if (!assertType(fn, 'function', 'canvas.extend', 'fn')) return this;
+      extAPI[name] = fn;
+      return canvasFn;
+    };
+    return canvasFn;
   };
 
   // Create a glQuery scene hierarchy
