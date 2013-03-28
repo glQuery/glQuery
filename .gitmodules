@@ -1,9 +1,9 @@
 [submodule "extra/math"]
 	path = extra/math
-	url = https://github.com/glQuery/glQuery-math.git
+        url = git@github.com:glQuery/glQuery-math.git
 [submodule "extra/ext"]
 	path = extra/ext
-	url = https://github.com/glQuery/glQuery-ext.git
+	url = git@github.com:glQuery/glQuery-ext.git
 [submodule "extra/shapes"]
 	path = extra/shapes
-	url = https://github.com/glQuery/glQuery-shapes.git
+        url = git@github.com:glQuery/glQuery-shapes.git
