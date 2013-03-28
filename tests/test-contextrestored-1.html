@@ -1,0 +1,176 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset='utf-8'>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+  <title>glQuery - Initialize using existing canvas by id</title>
+  <meta name='description' content='Tests for glQuery'>
+  <link rel="shortcut icon" href="/favicon.ico">
+
+  <!-- Stylesheet -->
+  <style type='text/css' media='screen'>
+    .var {
+      color: gray;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen layout -->
+
+  <div id='glqueryLog'></div>
+
+  <div id='main-layout'>
+    <div id='viewport'>
+      <!-- -->
+      <p> TODO: Test 1.1 context lost/restored features </p>
+      <canvas id='glqueryCanvas' width='512' height='512'>
+        <p>This application requires a browser that supports the<a href='http://www.w3.org/html/wg/html5/'>HTML5</a>&lt;canvas&gt; feature.</p>
+      </canvas>
+      <!-- -->
+    </div>
+  </div>
+
+  <!-- Prompt IE users to install Chrome Frame. chromium.org/developers/how-tos/chrome-frame-getting-started -->
+  <!--[if IE]>
+    <script src="//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.3/CFInstall.min.js"></script>
+    <script>window.attachEvent('onload',function(){CFInstall.check({mode:'overlay'})})</script>
+  <![endif]-->
+
+  <!-- Framework -->
+
+  <script src='../support/webgl-debug/webgl-debug.js'></script>
+  <script src='../dist/glquery-1.1.js'></script>
+  <script src='../dist/extra/glquery.math.module.js'></script>
+  
+  <!-- Resources -->
+
+
+  <!-- Application logic -->
+
+  <script>
+    window.onload = function() {
+      // Initialize WebGL (debug) context
+      var canvas = document.getElementById('glqueryCanvas');
+      var debugCanvas = WebGLDebugUtils.makeLostContextSimulatingCanvas(canvas);
+      var context = debugCanvas.getContext('experimental-webgl');
+      context.viewport(0, 0, canvas.width, canvas.height);
+      context.enable(context.DEPTH_TEST);
+      context.clearColor(0.0, 0.0, 0.0, 1.0);
+      context.clear(context.COLOR_BUFFER_BIT | context.DEPTH_BUFFER_BIT);
+
+      // Initialize shaders
+      var vertexShader = context.createShader(context.VERTEX_SHADER);
+      var fragmentShader = context.createShader(context.FRAGMENT_SHADER);
+      context.shaderSource(vertexShader,
+        "attribute vec3 position;\n" +
+        "uniform mat4 view;\n" +
+        "uniform mat4 projection;\n" +
+        "void main(void) {\n" +
+        "  gl_Position = projection * view * vec4(position, 1.0);\n" +
+        "}");
+      context.shaderSource(fragmentShader, 
+        "#ifdef GL_ES\n" +
+        "precision highp float;\n" +
+        "#endif\n" +
+        "void main(void) {\n" +
+        "  gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);\n" +
+        "}\n");
+      context.compileShader(vertexShader);
+      context.compileShader(fragmentShader);
+      var shaderProgram = context.createProgram();
+      context.attachShader(shaderProgram, vertexShader);
+      context.attachShader(shaderProgram, fragmentShader);
+      context.linkProgram(shaderProgram);
+      
+      // Initialize buffers
+      var z = 0.0;
+      var positions = [
+         0.5, 0.5,-0.5 + z,   0.5,-0.5,-0.5 + z,  -0.5,-0.5,-0.5 + z,
+        -0.5, 0.5,-0.5 + z,   0.5, 0.5, 0.5 + z,   0.5,-0.5, 0.5 + z,
+        -0.5,-0.5, 0.5 + z,  -0.5, 0.5, 0.5 + z,   0.5, 0.5,-0.5 + z,
+         0.5, 0.5, 0.5 + z,   0.5,-0.5, 0.5 + z,   0.5,-0.5,-0.5 + z,
+         0.5,-0.5,-0.5 + z,   0.5,-0.5, 0.5 + z,  -0.5,-0.5, 0.5 + z,
+        -0.5,-0.5,-0.5 + z,  -0.5,-0.5,-0.5 + z,  -0.5,-0.5, 0.5 + z,
+        -0.5, 0.5, 0.5 + z,  -0.5, 0.5,-0.5 + z,   0.5, 0.5, 0.5 + z,
+         0.5, 0.5,-0.5 + z,  -0.5, 0.5,-0.5 + z,  -0.5, 0.5, 0.5 + z
+      ],
+      indices = [
+         0, 1, 2,   0, 2, 3,
+         4, 7, 6,   4, 6, 5,
+         8, 9,10,   8,10,11,
+        12,13,14,  12,14,15,
+        16,17,18,  16,18,19,
+        20,21,22,  20,22,23 
+      ];
+
+      // Initialize WebGL resources
+      var gl = glQuery;
+      function createResources() {
+        // Create/recreate the WebGL resources
+        var vbo = context.createBuffer();
+        context.bindBuffer(context.ARRAY_BUFFER, vbo);
+        context.bufferData(context.ARRAY_BUFFER, new Float32Array(positions), context.STATIC_DRAW);
+
+        var ibo = context.createBuffer();
+        context.bindBuffer(context.ELEMENT_ARRAY_BUFFER, ibo);
+        context.bufferData(context.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), context.STATIC_DRAW);
+
+        // Assign/Reassign resources to the scene
+        return gl('main')
+          .shaderProgram(shaderProgram)
+          .vertexAttrib('position', vbo, 9*8, gl.FLOAT, 3, false, 0, 0)
+          .vertexElem(ibo, 6*6, gl.UNSIGNED_SHORT, 0)
+          .uniform('view', gl.matrix4.newLookAt([10.0,10.0,10.0], [0.0,0.0,0.0], [0.0,1.0,0.0]))
+          .uniform('projection', gl.matrix4.newOrtho(-1.0, 1.0, -1.0, 1.0, 0.1, 100.0))
+          .triangles()
+      }
+      
+      // Draw the scene with glQuery
+      gl.scene({'main': ''});
+      createResources().render(context);
+
+      // Event bindings
+      debugCanvas.addEventListener("webglcontextlost", function(event){
+          console.info("webglcontextlost", event);
+          document.getElementById('contextlost').textContent = String(context.isContextLost());
+          event.preventDefault();
+          // TEST: Try to render (should fail)
+          console.info("Render (context lost)...");
+          context.clear(context.COLOR_BUFFER_BIT | context.DEPTH_BUFFER_BIT);
+          gl('main').render(context);
+        }, false);
+      debugCanvas.addEventListener("webglcontextrestored", function(event){
+          console.info("webglcontextrestored", event);
+          document.getElementById('contextrestored').textContent = String(!context.isContextLost());
+          // Recreate WebGL resources
+          console.info("Recreate resources (context restored)...");
+          createResources();
+          // TEST: Try to render (should succeed)
+          console.info("Render (context restored)...");
+          context.clear(context.COLOR_BUFFER_BIT | context.DEPTH_BUFFER_BIT);
+          gl('main').render(context);
+        }, false);
+
+      document.getElementById('losecontext').onclick = function(){ 
+        console.debug("Lose context...");
+        document.getElementById('contextlost').innerHTML = "&nbsp;-&nbsp;";
+        document.getElementById('contextrestored').innerHTML = "&nbsp;-&nbsp;";
+        debugCanvas.loseContext();
+      };
+
+      document.getElementById('restorecontext').onclick = function(){ 
+        console.info("Restore context...");
+        document.getElementById('contextrestored').innerHTML = "&nbsp;-&nbsp;";
+        debugCanvas.restoreContext();
+      };
+    };
+  </script>
+  <p>
+    You should see a white cube rendered over a black background.
+    Push this button to force a context lost event and observe whether the cube restored: <button id="losecontext">lose context</button> <button id="restorecontext">restore context</button>
+  </p>
+  <p>Context lost: <span id="contextlost" class="var"></span> (should be true)</p>
+  <p>Context restored: <span id="contextrestored" class="var"></span> (should be true)</p>
+</body>
+</html>
