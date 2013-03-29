@@ -36,7 +36,7 @@
 
   <!-- Framework -->
 
-  <script src='../dist/glquery-1.1.js'></script>
+  <script src='../dist/glquery-2.0.js'></script>
   
   <!-- Resources -->
 
@@ -44,6 +44,16 @@
   <!-- Application logic -->
   <script>
     window.onload = function() {
+      var gl = glQuery;
+      gl.canvas('glqueryCanvas')
+      .clearColor(0.0,0.0,0.0,1.0)
+      .start('scene');
+
+      gl.scene({'scene': ''})
+      .shaderProgram(shaderProgram)
+      .vertexAttrib(vboAttribLocation, vbo, 9, gl.FLOAT, 3, false, 0, 0)
+      .triangles();
+
       // Initialize WebGL context
       var canvas = document.getElementById('glqueryCanvas');
       var context = canvas.getContext('experimental-webgl');
@@ -85,12 +95,13 @@
       context.bufferData(context.ARRAY_BUFFER, new Float32Array(positions), context.STATIC_DRAW);
       var vboAttribLocation = context.getAttribLocation(shaderProgram, 'position');
 
-      var gl = glQuery;
-      gl.scene({'scene': ''})
-      .shaderProgram(shaderProgram)
-      .vertexAttrib(vboAttribLocation, vbo, 9, gl.FLOAT, 3, false, 0, 0)
-      .triangles()
-      .render(context);
+      /* Add the canvas extension
+      console.log(gl.canvas);
+      gl.canvas.extend('test', function(self){
+        console.log("In test extension");
+        console.log("self:", self);
+      });
+      //*/
     };
   </script>
 </body>
