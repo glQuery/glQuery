@@ -62,7 +62,7 @@
         if (context.glContext.canvas !== canvasEl)
           continue;
         if (context.nextFrame == null && context.suspended === false)
-          window.requestAnimationFrame(context.fn(), context.glContext.canvas);
+          window.requestAnimationFrame(context.fnLoop(), context.glContext.canvas);
         break;
       }
     }, false);
@@ -86,7 +86,7 @@
               return; // Ensure rendering does not continue if context is lost
             self.glContext.clear(self.clearMask);
             gl(self.rootId).render(self.glContext);
-            self.nextFrame = window.requestAnimationFrame(fn, self.glContext.canvas);
+            self.nextFrame = window.requestAnimationFrame(fnLoop, self.glContext.canvas);
           };
         }
       };
