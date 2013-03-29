@@ -609,8 +609,9 @@ var glQuery = (function() {
   };
 
   // Initialize a WebGL canvas
-  gl.canvas = function(htmlCanvas, contextAttr, width, height) {
-    var canvasId, canvasEl;
+  var canvasExtAPI = {};
+  gl.canvas = function(selector, contextAttr) {
+    var canvasEl, domAttr = domAttr != null? domAttr : {};
     logDebug("canvas");
     var dummy = {
       start: function() { return this; },
@@ -619,23 +620,14 @@ var glQuery = (function() {
       clearDepth: function() { return this; },
       clearStencil: function() { return this; }
     };
-    if (typeof htmlCanvas === 'undefined') {
-      // Create canvas element
-      canvasId = 'glqueryCanvas';
-      document.write("<canvas id='" + canvasId + "' width='" + (width != null? width : 800) + "' height='" + (height != null? height : 800) + "'></canvas>");
-      canvasEl = document.getElementById(canvasId);
-    }
-    else {
-      // Get existing canvas element
-      if (!assert(typeof htmlCanvas === 'string' || (typeof htmlCanvas === 'object' && htmlCanvas.nodeName !== 'CANVAS'), "In call to 'canvas', expected type 'string', 'undefined' or 'canvas element' for 'htmlCanvas'. Instead, got type '" + typeof htmlCanvas + "'."))
-        return dummy;
-      canvasId = typeof htmlCanvas === 'string'? htmlCanvas : htmlCanvas.id;
-      canvasEl = typeof htmlCanvas === 'object'? htmlCanvas : document.getElementById(canvasId);
-    }
+    // Get existing canvas element
+    if (!assert(typeof selector === 'string' || (typeof selector === 'object' && selector.nodeName !== 'CANVAS'), "In call to 'canvas', expected type 'string', 'undefined' or 'canvas element' for 'selector'. Instead, got type '" + typeof selector + "'."))
+      return dummy;
+    canvasEl = typeof selector === 'object'? selector : document.querySelector(selector);
     if (!assert(canvasEl != null && typeof canvasEl === 'object' && canvasEl.nodeName === 'CANVAS', "In call to 'canvas', could not initialize canvas element."))
       return dummy;
-    if (canvasId != null)
-      logInfo("Initialized canvas: " + canvasId);
+    if (typeof selector === 'string')
+      logInfo("Initialized canvas: " + selector);
     else
       logInfo("Initialized canvas");
 
@@ -684,8 +676,7 @@ var glQuery = (function() {
     }, false);
 
     // Wrap glQuery canvas
-    extAPI = {};
-    canvasFn = (function() { 
+    return (function() { 
       var self = { // Private
         glContext: canvasCtx,
         rootId: null,
@@ -706,7 +697,7 @@ var glQuery = (function() {
       // Add context to the global list
       contexts.push(self);
       // Provide context canvas api
-      api = { // Public
+      var api = { // Public
         start: function(rootId) {
           logDebug("canvas.start");
           if (rootId != null) {
@@ -745,19 +736,32 @@ var glQuery = (function() {
           return this;
         }
       };
-      for (k in extAPI)
+      for (k in canvasExtAPI)
         if (!(k in api)) // Don't override the base api
-          api[k] = extAPI[k](self);
+          api[k] = canvasExtAPI[k](self);
       return api;
     })();
-    canvasFn.extend = function(name, fn) {
-      logDebug("canvas.extend (" + name + ")");
-      if (!assertType(name, 'string', 'canvas.extend', 'name')) return this;
-      if (!assertType(fn, 'function', 'canvas.extend', 'fn')) return this;
-      extAPI[name] = fn;
-      return canvasFn;
-    };
+  };
+
+  gl.canvas.extend = function(name, fn) {
+    logDebug("canvas.extend (" + name + ")");
+    if (!assertType(name, 'string', 'canvas.extend', 'name')) return this;
+    if (!assertType(fn, 'function', 'canvas.extend', 'fn')) return this;
+    canvasExtAPI[name] = fn;
     return canvasFn;
+  };
+
+  gl.canvas.create = function(id, contextAttr, domAttr) {
+    logDebug("canvas.create (#" + id + ")");
+    var id = (id == null)? 'glqueryCanvas' : id;
+    if (!assertType(id, 'string', 'canvas.create', 'id')) return this;
+    var newDomAttr = { id: id, width: 800, height: 800 };
+    for (var k in domAttr)
+      newDomAttr[k] = domAttr[k];
+    var canvasEl = document.createElement('canvas');
+    Object.keys(newDomAttr).map(function(k){ canvasEl.setAttribute(k, newDomAttr[k]); }).join(' ');    
+    document.write(canvasEl.outerHTML);
+    return gl.canvas("#" + id, contextAttr);
   };
 
   var registerContextEvent = function(eventName, fn, active) {
