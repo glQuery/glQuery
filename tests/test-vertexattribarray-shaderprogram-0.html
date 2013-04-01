@@ -86,7 +86,6 @@
       var vboAttribLocation = context.getAttribLocation(shaderProgram, 'position');
 
       //* TEST: Draw the scene with glQuery
-      var gl = glQuery;
       gl.scene({'scene': ''})
       .shaderProgram(shaderProgram)
       .vertexAttrib(vboAttribLocation, vbo, 9, gl.FLOAT, 3, false, 0, 0)
