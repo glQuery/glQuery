@@ -48,10 +48,8 @@
       // Initialize WebGL context
       var canvas = document.getElementById('glqueryCanvas');
       var context = canvas.getContext('experimental-webgl');
-      context.viewport(0, 0, canvas.width, canvas.height);
       context.enable(context.DEPTH_TEST);
-      context.clearColor(0.0, 0.0, 0.0, 1.0);
-      context.clear(context.COLOR_BUFFER_BIT | context.DEPTH_BUFFER_BIT);
+      context.viewport(0, 0, canvas.width, canvas.height);
 
       // Initialize shaders
       var vertexShader = context.createShader(context.VERTEX_SHADER);
@@ -86,11 +84,23 @@
       context.bufferData(context.ARRAY_BUFFER, new Float32Array(positions), context.STATIC_DRAW);
       var vboAttribLocation = context.getAttribLocation(shaderProgram, 'position');
 
+      // Initialize the canvas
+      var glCanvas = gl.canvas(context)
+      .clearColor(0.0,0.0,0.0,1.0)
+      .clear(context.COLOR_BUFFER_BIT | context.DEPTH_BUFFER_BIT)
+      .start('scene');
+
+      // Initialize the scene 
       gl.scene({'scene': ''})
       .shaderProgram(shaderProgram)
       .vertexAttrib(vboAttribLocation, vbo, 9, gl.FLOAT, 3, false, 0, 0)
-      .triangles()
-      .render(context);
+      .triangles();
+
+      // Take a snapshot of the canvas
+      var jpegUri = glCanvas.snapshot([800,800], [600,600], 'image/jpeg', 0.9);
+      var pngUri = glCanvas.snapshot([800,800], [600,600], 'image/png');
+      console.info("JPEG URI:", jpegUri);
+      console.info("PNG URI:", pngUri);
     };
   </script>
 </body>
