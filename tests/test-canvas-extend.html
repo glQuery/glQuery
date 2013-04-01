@@ -45,22 +45,12 @@
   <script>
     window.onload = function() {
       var gl = glQuery;
-      gl.canvas('glqueryCanvas')
-      .clearColor(0.0,0.0,0.0,1.0)
-      .start('scene');
-
-      gl.scene({'scene': ''})
-      .shaderProgram(shaderProgram)
-      .vertexAttrib(vboAttribLocation, vbo, 9, gl.FLOAT, 3, false, 0, 0)
-      .triangles();
-
+      
       // Initialize WebGL context
       var canvas = document.getElementById('glqueryCanvas');
       var context = canvas.getContext('experimental-webgl');
-      context.viewport(0, 0, canvas.width, canvas.height);
       context.enable(context.DEPTH_TEST);
-      context.clearColor(0.0, 0.0, 0.0, 1.0);
-      context.clear(context.COLOR_BUFFER_BIT | context.DEPTH_BUFFER_BIT);
+      context.viewport(0, 0, canvas.width, canvas.height);
 
       // Initialize shaders
       var vertexShader = context.createShader(context.VERTEX_SHADER);
@@ -95,13 +85,28 @@
       context.bufferData(context.ARRAY_BUFFER, new Float32Array(positions), context.STATIC_DRAW);
       var vboAttribLocation = context.getAttribLocation(shaderProgram, 'position');
 
-      /* Add the canvas extension
-      console.log(gl.canvas);
-      gl.canvas.extend('test', function(self){
-        console.log("In test extension");
-        console.log("self:", self);
+      //* Add the canvas extension
+      gl.canvas.extend('test', function(self){ return function() {
+          console.log("In test extension.");
+          console.log("  self:", self);
+          console.log("  arguments:", arguments);
+        };
       });
       //*/
+
+      // Initialize the canvas
+      gl.canvas(context)
+      .clearColor(0.0,0.0,0.0,1.0)
+      .clear(context.COLOR_BUFFER_BIT | context.DEPTH_BUFFER_BIT)
+      .start('scene')
+      .test("test-argument");
+
+      // Initialize the scene      
+      gl.scene({'scene': ''})
+      .shaderProgram(shaderProgram)
+      .vertexAttrib(vboAttribLocation, vbo, 9, gl.FLOAT, 3, false, 0, 0)
+      .triangles();
+      
     };
   </script>
 </body>
