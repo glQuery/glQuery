@@ -137,7 +137,7 @@
           return this;
         }
       };
-      for (k in canvasExtAPI)
+      for (var k in canvasExtAPI)
         if (!(k in api)) // Don't override the base api
           api[k] = canvasExtAPI[k](self);
       return api;
@@ -149,7 +149,7 @@
     if (!assertType(name, 'string', 'canvas.extend', 'name')) return this;
     if (!assertType(fn, 'function', 'canvas.extend', 'fn')) return this;
     canvasExtAPI[name] = fn;
-    return canvasFn;
+    return gl.canvas;
   };
 
   gl.canvas.create = function(id, contextAttr, domAttr) {
