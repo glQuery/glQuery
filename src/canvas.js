@@ -17,9 +17,9 @@
       clearStencil: function() { return this; }
     };
     // Get existing canvas element
-    if (!assert(typeof selector === 'string' || (typeof selector === 'object' && selector.nodeName !== 'CANVAS'), "In call to 'canvas', expected type 'string', 'undefined' or 'canvas element' for 'selector'. Instead, got type '" + typeof selector + "'."))
+    if (!assert(typeof selector === 'string' || (typeof selector === 'object' && (selector.nodeName === 'CANVAS' || selector instanceof WebGLRenderingContext)), "In call to 'canvas', expected type 'string', 'undefined' or 'canvas element' for 'selector'. Instead, got type '" + typeof selector + "'."))
       return dummy;
-    canvasEl = typeof selector === 'object'? selector : document.querySelector(selector);
+    canvasEl = typeof selector === 'object'? (selector instanceof WebGLRenderingContext? selector.canvas : selector) : document.querySelector(selector);
     if (!assert(canvasEl != null && typeof canvasEl === 'object' && canvasEl.nodeName === 'CANVAS', "In call to 'canvas', could not initialize canvas element."))
       return dummy;
     if (typeof selector === 'string')
@@ -28,7 +28,7 @@
       logInfo("Initialized canvas");
 
     // Initialize the WebGL context
-    var canvasCtx = canvasEl.getContext('experimental-webgl', contextAttr);
+    var canvasCtx = selector instanceof WebGLRenderingContext? selector : canvasEl.getContext('experimental-webgl', contextAttr);
     if (!assert(canvasCtx != null, "Could not get a 'experimental-webgl' context."))
       return dummy;
 
@@ -129,6 +129,11 @@
         clearStencil: function(s) {
           logDebug("canvas.clearStencil");
           self.glContext.clearStencil(s);
+          return this;
+        },
+        viewport: function(x, y, width, height) {
+          logDebug("canvas.viewport");
+          self.glContext.viewport(x, y, width, height);
           return this;
         }
       };
