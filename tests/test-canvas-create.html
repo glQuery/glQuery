@@ -21,7 +21,7 @@
     <div id='viewport'>
       <!-- -->
       <canvas id='glqueryCanvas' width='512' height='512'>
-        <p>This application requires a browser that supports the<a href='http://www.w3.org/html/wg/html5/'>HTML5</a>&lt;canvas&gt; feature.</p>
+        <p>This application requires a browser that supports the <a href='http://www.w3.org/html/wg/html5/'>HTML5</a> &lt;canvas&gt; feature.</p>
       </canvas>
       <!-- -->
     </div>
@@ -43,10 +43,15 @@
   <!-- Application logic -->
 
   <script>
+    var
+      counter = 0,
+      fnPre = function() { console.info("Pre-callback"); },
+      fnIdle = function() { if (counter % 30 == 0) console.info("."); ++counter; },
+      fnPost =  function() { console.info("Post-callback"); };
     window.onload = function() {
       gl.canvas.create('glqueryCanvas')
       .clearColor(0.0,0.0,0.0,1.0)
-      .start('main');
+      .start('main', fnPre, fnPost, fnIdle);
     };
   </script>
   <p>You should see an empty black background.</p>
