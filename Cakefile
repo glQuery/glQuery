@@ -33,6 +33,7 @@ libFiles =
     'shader'
     'footer']
   '2.0': baseLibFiles.concat [
+    'core-2.0'
     'refresh'
     'tag'
     'state'

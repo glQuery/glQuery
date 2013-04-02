@@ -26,8 +26,6 @@ var glQuery = (function() {
   shaderLocations = {},
   // Counters for identifiers
   shaderProgramCounter = 0,
-  // WebGL contexts
-  contexts = [],
   // Event callbacks
   eventFns = { 
     contextlost: [], 
