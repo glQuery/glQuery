@@ -103,15 +103,16 @@
       context.bufferData(context.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), context.STATIC_DRAW);
       
       //* TEST: Draw the scene with glQuery
-      gl.scene({'main': ['left cube', 'right cube']});
+      //gl.scene({'main': ['left cube', 'right cube']});
+      gl.scene({'main': ['left cube']});
       
       gl('cube')
       .shaderProgram(shaderProgram)
       .vertexAttrib('position', vbo, 9*8, gl.FLOAT, 3, false, 0, 0)
       .vertexElem(ibo, 6*6, gl.UNSIGNED_SHORT, 0)
       .triangles();
-      gl('left').uniform('offset', -0.5);
-      gl('right').uniform('offset', 0.5);
+      //gl('left').uniform('offset', -0.5);
+      //gl('right').uniform('offset', 0.5);
 
       gl('main').render(context);
       //*/
